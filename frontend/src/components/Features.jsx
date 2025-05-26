@@ -40,7 +40,7 @@ export default function Features() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
-            Why Choose FUL2WIN?
+            Why Choose ful2win?
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             Experience the best gaming platform with instant rewards, secure transactions, and a thriving community

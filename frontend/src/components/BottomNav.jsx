@@ -55,7 +55,7 @@ export default function BottomNav() {
             >
               <img
                 src="/images/logo.jpg"
-                alt="FUL2WIN Logo"
+                alt="ful2win Logo"
                 className="h-14 w-14 rounded-2xl bg-white/90 shadow-md"
               />
             </Link>

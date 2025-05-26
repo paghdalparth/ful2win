@@ -6,7 +6,7 @@ export default function TopBar() {
       {/* Logo Only */}
       <div className="flex items-center gap-3">
         <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-gray-900 p-1 rounded-2xl shadow-lg">
-          <img src="/images/logo.jpg" alt="FUL2WIN Logo" className="h-12 w-12 rounded-xl bg-white/95 shadow-md" />
+          <img src="/images/logo.jpg" alt="ful2win Logo" className="h-12 w-12 rounded-xl bg-white/95 shadow-md" />
         </div>
       </div>
       {/* Notification Icon Only */}

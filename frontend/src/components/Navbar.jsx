@@ -24,9 +24,9 @@ export default function Navbar() {
   return (
     <nav className="glass-effect shadow-xl w-full fixed top-0 left-0 z-[1100] rounded-b-3xl py-3 px-2 md:px-8 flex items-center justify-between">
       <div className="flex items-center h-16">
-        <img src="/images/logo.jpg" alt="FUL2WIN Logo" className="h-12 w-12 rounded-lg shadow-md bg-white/80" />
+        <img src="/images/logo.jpg" alt="ful2win Logo" className="h-12 w-12 rounded-lg shadow-md bg-white/80" />
         <div className="ml-3 hidden md:block">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">FUL2WIN</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">ful2win</h1>
           <p className="text-sm text-gray-600">Play & Win Real Cash</p>
         </div>
       </div>

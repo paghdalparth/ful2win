@@ -18,7 +18,7 @@ export default function HomePage() {
           <div className="flex items-center">
             <img 
               src="/images/logo.jpg" 
-              alt="FUL2WIN" 
+              alt="ful2win" 
               className="h-10 w-10 rounded-lg mr-2" 
             />
             <span className="font-bold text-white text-lg">BoostNow</span>

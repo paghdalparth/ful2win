@@ -201,11 +201,11 @@ function HomePage() {
             <div className="relative z-10 flex flex-col items-center justify-center">
               <img
                 src="/images/logo.jpg"
-                alt="FUL2WIN Logo"
+                alt="ful2win Logo"
                 className="h-24 w-24 mb-6 rounded-2xl shadow-2xl animate-float"
               />
               <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg tracking-wide animate-pulse-glow">
-                FUL2WIN
+                ful2win
               </h1>
             </div>
           </div>
