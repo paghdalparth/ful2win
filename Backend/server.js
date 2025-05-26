@@ -18,17 +18,20 @@ const server = http.createServer(app);
 // Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http:/localhost:5173/", // React app
+    origin: "https://ful2win.onrender.com",  // Your deployed frontend URL
     methods: ["GET", "POST", "PUT"],
   },
 });
+
 
 // Middleware
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
-app.use(cors());
+app.use(cors({
+  origin: "https://ful2win.onrender.com"
+}));
 app.use(express.json());
 
 // Connect MongoDB
