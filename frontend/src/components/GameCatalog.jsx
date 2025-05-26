@@ -8,11 +8,11 @@ export default function GameCatalog() {
   const navigate = useNavigate()
 
   const games = {
-    All: ["Ludo", "Carrom", "Chess", "BGMI", "Freefire", "TicTacToe", "Uno", "CoinFlip", "Dice", "MemoryMatch", "StonePaper"],
-    Board: ["Ludo", "Carrom", "Chess", "TicTacToe"],
-    Action: ["BGMI", "Freefire"],
+    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch"],
+    Board: ["TicTacToe", "Ludo", "Carrom", "Chess"],
+    Action: ["Freefire", "BGMI"],
     Card: ["Uno"],
-    Casino: ["CoinFlip", "Dice", "StonePaper", "MemoryMatch"]
+    Casino: ["StonePaper", "CoinFlip", "Dice", "MemoryMatch"]
   }
 
   const gameLinks = {

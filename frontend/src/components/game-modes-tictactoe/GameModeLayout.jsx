@@ -5,9 +5,11 @@ import { ChevronLeft } from 'lucide-react';
 
 export default function GameModeLayout({ title, children, onBack, gameMode = "Classic Mode" }) {
   return (
-    <div className="flex flex-col h-full min-h-screen bg-[#31036e]">
+    <div className="flex flex-col h-full min-h-screen  bg-black/40">
+    {/* <div className="flex flex-col h-full min-h-screen bg-[#31036e]"> */}
       {/* Header */}
-      <div className="p-3 flex items-center justify-between bg-[#1c0146] text-white">
+      <div className="p-3 flex items-center justify-between bg-transparent text-white">
+      {/* <div className="p-3 flex items-center justify-between bg-[#1c0146] text-white"> */}
         <div className="flex items-center">
           <button className="mr-3 text-white p-1" onClick={onBack}>
             <ChevronLeft size={20} />
@@ -15,7 +17,8 @@ export default function GameModeLayout({ title, children, onBack, gameMode = "Cl
           <h1 className="text-lg font-medium">{title}</h1>
         </div>
         <div className="flex items-center">
-          <div className="px-3 py-1 bg-[#1c0146] rounded-full flex items-center border border-purple-700/30">
+          <div className="px-3 py-1 bg-transparent rounded-full flex items-center border border-purple-700/30">
+          {/* <div className="px-3 py-1 bg-[#1c0146] rounded-full flex items-center border border-purple-700/30"> */}
             <span className="text-sm font-medium text-white">₹1240</span>
           </div>
         </div>
@@ -24,6 +27,7 @@ export default function GameModeLayout({ title, children, onBack, gameMode = "Cl
       {/* Game logo */}
       <div className="flex flex-col items-center pt-4 pb-2">
         <div className="w-14 h-14 bg-purple-800/50 rounded-lg border border-purple-700/50 flex items-center justify-center mb-1">
+        {/* <div className="w-14 h-14 bg-purple-800/50 rounded-lg border border-purple-700/50 flex items-center justify-center mb-1"> */}
           <img 
             src="/tictactoe.png" 
             alt="TicTacToe Logo" 
@@ -38,7 +42,8 @@ export default function GameModeLayout({ title, children, onBack, gameMode = "Cl
       </div>
 
       {/* Content */}
-      <div className="flex-grow p-4 bg-[#31036e] text-white overflow-y-auto">
+      <div className="flex-grow p-4 bg-transparent text-white overflow-y-auto">
+      {/* <div className="flex-grow p-4 bg-[#31036e] text-white overflow-y-auto"> */}
         {children}
       </div>
     </div>

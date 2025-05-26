@@ -260,9 +260,13 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+       <div className="flex relative w-full flex-col items-center justify-center h-full bg-cover bg-center" style={{ backgroundImage: "url('/images/games/tictactoe-logo.jpg')" }}>
+     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+    {/* <div className="flex  flex-col items-center justify-center h-full bg-cover bg-center" style={{ backgroundImage: "url('/images/games/tictactoe-logo.jpg')" }}> */}
+    {/* <div className="flex flex-col items-center bg-red-400 justify-center h-full"> */}
+    {/* <div className='h-full w-full items-center bg-black/40'> */}
       {/* Round indicator */}
-      <div className="bg-white/10 rounded-lg px-4 py-2 mb-6">
+      <div className="bg-white/10  rounded-lg px-4 py-2 mb-6">
         <div className="flex justify-between items-center w-64">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-400">
@@ -299,7 +303,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
                 flex items-center justify-center 
                 w-20 h-20 text-4xl font-bold rounded-md
                 ${cell ? 'cursor-default' : 'cursor-pointer'}
-                ${cell === null ? 'bg-white/5 hover:bg-white/10' : 
+                ${cell === null ? 'bg-white/90 hover:bg-white/10' : 
                   cell === playerSymbols.player1 ? 'bg-blue-500/20 text-blue-400' : 
                   'bg-red-500/20 text-red-400'}
                 transition-all
@@ -355,6 +359,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
           </div>
         </div>
       )}
+      {/* </div> */}
     </div>
   );
 };

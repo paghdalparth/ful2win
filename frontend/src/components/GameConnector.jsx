@@ -181,6 +181,7 @@ const GameConnector = () => {
   return (
     <EnhancedGameLobby 
       gameId={gameId}
+      gameImg={gameId}
       gameMode={getFormattedModeType()}
       entryFee={price}
       onExit={handleExit}

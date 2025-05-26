@@ -81,11 +81,12 @@ export default function ClassicMode({ onBack, gameTitle = "TicTacToe" }) {
     }
   };
 
-  return (
+   return (<div className="h-screen bg-cover bg-center" style={{ backgroundImage: "url('/images/games/tictactoe-logo.jpg')" }}>
     <GameModeLayout title={gameTitle} onBack={onBack}>
       {/* Display wallet balance */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 mb-4 flex justify-between items-center">
-        <span className="text-sm text-white/80">Your Balance:</span>
+      <div className="bg-transparent backdrop-blur-sm rounded-lg p-3 mb-4 flex justify-between items-center">
+      {/* <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-3 mb-4 flex justify-between items-center"> */}
+       <span className="text-sm text-white/80">Your Balance:</span>
         <span className="text-white font-bold">₹{balance.toFixed(2)}</span>
       </div>
       
@@ -137,5 +138,6 @@ export default function ClassicMode({ onBack, gameTitle = "TicTacToe" }) {
         ))}
       </div>
     </GameModeLayout>
+    </div>
   );
 }

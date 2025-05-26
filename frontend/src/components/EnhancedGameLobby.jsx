@@ -14,6 +14,7 @@ import socket from '../socekt';
 const EnhancedGameLobby = ({
   entryFee = 10,
   gameMode = "Classic",
+  gameImg="/"+gameImg+".jpg",
   onPlayAgain = null,
   onExit = null,
   gameId: propGameId = null,
@@ -436,7 +437,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
       {/* Dynamic Game Background */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={gameBg || "/placeholder.jpg"} 
+          src={"/"+gameImg+".jpg" || "/placeholder.jpg"} 
           alt="Game Background" 
           className="w-full h-full object-cover"
         />
