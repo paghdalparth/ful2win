@@ -29,7 +29,7 @@ export default function GameModeLayout({ title, children, onBack, gameMode = "Cl
         <div className="w-14 h-14 bg-purple-800/50 rounded-lg border border-purple-700/50 flex items-center justify-center mb-1">
         {/* <div className="w-14 h-14 bg-purple-800/50 rounded-lg border border-purple-700/50 flex items-center justify-center mb-1"> */}
           <img 
-            src="/tictactoe.png" 
+            src="/tictactoe.jpg" 
             alt="TicTacToe Logo" 
             className="w-12 h-12 object-contain"
             onError={(e) => {

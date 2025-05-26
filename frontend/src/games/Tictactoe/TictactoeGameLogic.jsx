@@ -266,13 +266,14 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
     {/* <div className="flex flex-col items-center bg-red-400 justify-center h-full"> */}
     {/* <div className='h-full w-full items-center bg-black/40'> */}
       {/* Round indicator */}
-      <div className="bg-white/40  rounded-lg px-4 py-2 mb-6">
+      <div className="bg-black/40   rounded-lg px-4 py-2 mb-6">
         <div className="flex justify-between items-center w-64">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-400">
               {roundScore.player1}
             </div>
-            <div className="text-xs text-white/60">{getPlayerLabel(true)}</div>
+            <div className="text-xs text-black text-white/60">{getPlayerLabel(true)}</div>
+            {/* <div className="text-xs text-black text-white/60">{getPlayerLabel(true)}</div> */}
           </div>
           
           <div className="text-center">
@@ -294,7 +295,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
       </div>
       
       {/* Game board */}
-      <div className="bg-white/10 rounded-lg p-4 shadow-lg">
+      <div className="bg-black/40 rounded-lg p-4 shadow-lg">
         <div className="grid grid-cols-3 gap-2 w-64 h-64">
           {board.map((cell, index) => (
             <button
