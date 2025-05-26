@@ -57,7 +57,7 @@ export default function TournamentMode({ onBack, gameTitle = "Dice" }) {
       gameTitle={gameTitle}
       modeType="Tournament"
       gameOptions={tournamentOptions}
-      logoSrc="/images/games/dice-logo.png"
+      logoSrc="/images/games/dice-logo.jpg"
     />
   )
 } 

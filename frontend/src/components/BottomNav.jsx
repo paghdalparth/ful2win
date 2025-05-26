@@ -54,8 +54,8 @@ export default function BottomNav() {
               className="bg-gradient-to-br from-purple-600 to-blue-600 p-1 rounded-2xl shadow-xl hover:scale-105 transition"
             >
               <img
-                src="/images/logo.png"
-                alt="BoostNow Games Logo"
+                src="/images/logo.jpg"
+                alt="FUL2WIN Logo"
                 className="h-14 w-14 rounded-2xl bg-white/90 shadow-md"
               />
             </Link>

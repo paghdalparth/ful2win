@@ -17,8 +17,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
           <div className="flex items-center">
             <img 
-              src="/images/logo.png" 
-              alt="BoostNow Games" 
+              src="/images/logo.jpg" 
+              alt="FUL2WIN" 
               className="h-10 w-10 rounded-lg mr-2" 
             />
             <span className="font-bold text-white text-lg">BoostNow</span>

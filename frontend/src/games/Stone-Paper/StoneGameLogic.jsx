@@ -94,7 +94,7 @@ const [use, setUse]=useState("0")
 
       try {
         // First, check if a game already exists for this room
-        const response = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`)
+        const response = await axios.get(`https://FUL2WIN-backend.onrender.com/api/game/room/${roomId}`)
         if (response.data) {
           console.log('Existing game found:', response.data)
           setGameId(response.data._id)
@@ -122,7 +122,7 @@ const [use, setUse]=useState("0")
         }
 
         console.log('Creating new game with data:', gameData)
-        const createResponse = await axios.post('https://ful2win-backend.onrender.com/api/game/create', gameData)
+        const createResponse = await axios.post('https://FUL2WIN-backend.onrender.com/api/game/create', gameData)
         console.log('Game created successfully:', createResponse.data)
         
         setGameId(createResponse.data._id)
@@ -244,7 +244,7 @@ if (game.winner === userId) {
   useEffect(() => {
     const fetchGame = async () => {
       try {
-        const response = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`);
+        const response = await axios.get(`https://FUL2WIN-backend.onrender.com/api/game/room/${roomId}`);
         const gameData = response.data;
         setGame(gameData);
 
@@ -297,7 +297,7 @@ useEffect(() => {
       setIsProcessingUpdate(true)
 
       // Send move update
-      const response = await axios.put(`https://ful2win-backend.onrender.com/api/game/move/${gameId}`, {
+      const response = await axios.put(`https://FUL2WIN-backend.onrender.com/api/game/move/${gameId}`, {
         playerId: userId,
         move: choice,
         roundNumber: roundNumber
@@ -316,7 +316,7 @@ useEffect(() => {
       console.log('Move updated successfully:', response.data)
 
       // Check if both players have made their moves
-      const updatedGame = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`)
+      const updatedGame = await axios.get(`https://FUL2WIN-backend.onrender.com/api/game/room/${roomId}`)
       const currentRound = updatedGame.data.rounds.find(r => r.roundNumber === roundNumber)
       
       if (currentRound && currentRound.player1Move && currentRound.player2Move) {
@@ -357,7 +357,7 @@ useEffect(() => {
       }
 
       // Get current game state
-      const currentGame = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`)
+      const currentGame = await axios.get(`https://FUL2WIN-backend.onrender.com/api/game/room/${roomId}`)
       const currentRounds = currentGame.data.rounds || []
       const currentRound = currentRounds.find(r => r.round === roundNumber) || { round: roundNumber }
 
@@ -370,7 +370,7 @@ useEffect(() => {
         winner: roundWinner
       }
 
-      await axios.put(`https://ful2win-backend.onrender.com/api/game/round/${gameId}`, {
+      await axios.put(`https://FUL2WIN-backend.onrender.com/api/game/round/${gameId}`, {
         round: updatedRound
       })
 
@@ -387,13 +387,13 @@ useEffect(() => {
         // setWinner(gameWinner === userId ? "player1" : "player2")
 
         // Update game status and room status
-        await axios.put(`https://ful2win-backend.onrender.com/api/game/round/${gameId}`, {
+        await axios.put(`https://FUL2WIN-backend.onrender.com/api/game/round/${gameId}`, {
           status: 'finished',
           winner: gameWinner
         })
 
         // Update room status
-        await axios.put(`https://ful2win-backend.onrender.com/api/room/${roomId}/status`, {
+        await axios.put(`https://FUL2WIN-backend.onrender.com/api/room/${roomId}/status`, {
           status: 'finished',
           winner: gameWinner
         })
@@ -422,7 +422,7 @@ useEffect(() => {
   }
 async function updateGameWinner(roomId) {
   try {
-    const response = await fetch(`https://ful2win-backend.onrender.com/api/game/update-winner/${roomId}`, {
+    const response = await fetch(`https://FUL2WIN-backend.onrender.com/api/game/update-winner/${roomId}`, {
       method: 'PUT'
     });
 

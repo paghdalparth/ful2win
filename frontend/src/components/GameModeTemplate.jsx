@@ -9,7 +9,7 @@ export default function GameModeTemplate({
   gameTitle = "Game",
   modeType = "Classic", // "Classic" or "Tournament"
   gameOptions = [],
-  logoSrc = "/game-logo.png"
+  logoSrc = "/game-logo.jpg"
 }) {
   const navigate = useNavigate()
   const [showHistory, setShowHistory] = useState(false)

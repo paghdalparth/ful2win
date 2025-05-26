@@ -200,12 +200,12 @@ function HomePage() {
             <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
             <div className="relative z-10 flex flex-col items-center justify-center">
               <img
-                src="/images/logo.png"
-                alt="BoostNow Games Logo"
+                src="/images/logo.jpg"
+                alt="FUL2WIN Logo"
                 className="h-24 w-24 mb-6 rounded-2xl shadow-2xl animate-float"
               />
               <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg tracking-wide animate-pulse-glow">
-                BoostNow Games
+                FUL2WIN
               </h1>
             </div>
           </div>
