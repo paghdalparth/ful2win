@@ -2,6 +2,7 @@
 import Navbar from '../components/Navbar';
 import BottomNav from '../components/BottomNav';
 import { useState } from "react"
+// import {Link} from "react-router-dom";
 import {
   Bell,
   ChevronRight,
@@ -300,9 +301,14 @@ export default function ProfilePage() {
               </div>
 
               {/* Logout Button */}
-              <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2">
+              {/* <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2">
                 <LogOut className="h-5 w-5" /> Logout
+              </button> */}
+
+              <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2">
+                <Link to = "/login" className="h-5 w-5" > Login</Link>
               </button>
+
             </div>
           )}
 
