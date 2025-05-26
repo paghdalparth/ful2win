@@ -5,11 +5,23 @@ import GameStats from "../components/GameStats";
 import SpinToWin from "../components/SpinToWin";
 import BottomNav from "../components/BottomNav";
 import { Wallet as WalletIcon, Bell } from 'lucide-react';
-
+import { useNavigate } from "react-router-dom";
 export default function HomePage() {
   const [showWallet, setShowWallet] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+ const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    // Check if user is logged in (exists in localStorage)
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      // Not logged in, redirect to login
+      navigate("/login");
+    } else {
+      setUser(JSON.parse(storedUser));
+    }
+  }, [navigate]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-gray-900 overflow-hidden">
       {/* Header with wallet and notifications */}

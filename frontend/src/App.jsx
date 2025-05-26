@@ -40,6 +40,8 @@ import TicTacToe from './games/Tictactoe/Tictactoe';
 import GamingLoginMobile from './components/login_signup/GamingLoginMobile';
 import GameResultLobby from './components/GameResultLobby';
 import TictactoeGameLogic from './games/Tictactoe/TictactoeGameLogic';
+import PrivateRoute from './components/PrivateRoute';
+import NotFound from './pages/NotFound';
 
 function HomePage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -253,130 +255,131 @@ function App() {
     <WalletProvider>
       <Router>
         <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/games" element={<GamesPage />} />
+        <Route path="/"  element={<PrivateRoute><HomePage/></PrivateRoute> } />
+        <Route path="/games" element={<PrivateRoute><GamesPage /></PrivateRoute>} />
         
         {/* Game Detail and Lobby */}
-        <Route path="/game/:gameId" element={<GameDetailPage />} />
-        <Route path="/game/:gameId/lobby" element={<GameLobby />} />
+        <Route path="/game/:gameId" element={<PrivateRoute><GameDetailPage /></PrivateRoute>} />
+        <Route path="/game/:gameId/lobby" element={<PrivateRoute><GameLobby /></PrivateRoute>} />
         
         {/* Game Dashboard Routes for all implemented games */}
-        <Route path="/games/tictactoe" element={
+        <Route path="/games/tictactoe" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="TicTacToe" 
             gameImage="/tictactoe.jpg"
             gameCategory="Board"
-          />
+          /></PrivateRoute>
         } />
-        <Route path="/games/stonepaper" element={
+        <Route path="/games/stonepaper" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="StonePaper" 
             gameImage="/stonepaper.jpg"
             gameCategory="Casino"
-          />
+          /></PrivateRoute>
         } />
-        <Route path="/games/memorymatch" element={
+        <Route path="/games/memorymatch" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="MemoryMatch" 
             gameImage="/memorymatch.png"
             gameCategory="Casino"
           />
+          </PrivateRoute>
         } />
-        <Route path="/games/dice" element={
+        <Route path="/games/dice" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="Dice" 
             gameImage="/dice.png"
             gameCategory="Casino"
-          />
+          /></PrivateRoute>
         } />
-        <Route path="/games/coinflip" element={
+        <Route path="/games/coinflip" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="CoinFlip" 
             gameImage="/coinflip.jpg"
             gameCategory="Casino"
-          />
+          /></PrivateRoute>
         } />
         
         {/* Direct game routes (accessible after selecting mode in dashboard) */}
-        <Route path="/games/tictactoe/play" element={<TicTacToe />} />
-        <Route path="/games/stonepaper/play" element={<SPS />} />
-        <Route path="/games/memorymatch/play" element={<MemoryMatchGame />} />
-        <Route path="/games/dice/play" element={<DiceDuel />} />
-        <Route path="/games/coinflip/play" element={<CoinFlipBet />} />
+        <Route path="/games/tictactoe/play" element={<PrivateRoute><TicTacToe /></PrivateRoute>} />
+        <Route path="/games/stonepaper/play" element={<PrivateRoute><SPS /></PrivateRoute>} />
+        <Route path="/games/memorymatch/play" element={<PrivateRoute><MemoryMatchGame /></PrivateRoute>} />
+        <Route path="/games/dice/play" element={<PrivateRoute><DiceDuel /></PrivateRoute>} />
+        <Route path="/games/coinflip/play" element={<PrivateRoute><CoinFlipBet /></PrivateRoute>} />
         
         {/* Coming Soon Games */}
-        <Route path="/games/ludo" element={<ComingSoonPage />} />
-        <Route path="/games/carrom" element={<ComingSoonPage />} />
-        <Route path="/games/chess" element={<ComingSoonPage />} />
-        <Route path="/games/uno" element={<ComingSoonPage />} />
-        <Route path="/games/bgmi" element={<ComingSoonPage />} />
-        <Route path="/games/freefire" element={<ComingSoonPage />} />
+        <Route path="/games/ludo" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        <Route path="/games/carrom" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        <Route path="/games/chess" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        <Route path="/games/uno" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        <Route path="/games/bgmi" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        <Route path="/games/freefire" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
         
         {/* Other App Routes */}
-        <Route path="/community" element={<CommunityWrapper />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/rewards" element={<Rewards />} />
-        <Route path="/history" element={<History />} />
+        <Route path="/community" element={<PrivateRoute><CommunityWrapper /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+        <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
+        <Route path="/wallet" element={<PrivateRoute><Wallet /></PrivateRoute>} />
+        <Route path="/rewards" element={<PrivateRoute><Rewards /></PrivateRoute>} />
+        <Route path="/history" element={<PrivateRoute><History /></PrivateRoute>} />
         
         {/* Game Modes */}
         <Route 
           path="/games/tictactoe/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} /></PrivateRoute>} 
         />
         <Route 
           path="/games/memorymatch/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="memorymatch" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="memorymatch" /></PrivateRoute>} 
         />
         <Route 
           path="/games/carrom/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="carrom" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="carrom" /></PrivateRoute>} 
         />
         <Route 
           path="/games/chess/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="chess" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="chess" /></PrivateRoute>} 
         />
         <Route 
           path="/games/ludo/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="ludo" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="ludo" /></PrivateRoute>} 
         />
         <Route 
           path="/games/coinflip/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="coinflip" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="coinflip" /></PrivateRoute>} 
         />
         <Route 
           path="/games/dice/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="dice" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="dice" /></PrivateRoute>} 
         />
         <Route 
           path="/games/stonepaper/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="stonepaper" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="stonepaper" /></PrivateRoute>} 
         />
         <Route 
           path="/games/bgmi/*" 
-          element={<GameModeRouter onBack={() => window.history.back()} gameType="bgmi" />} 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="bgmi" /></PrivateRoute>} 
         />
         
         {/* Game Connector for all games */}
         <Route 
           path="/games/:gameId/play/:modeType" 
-          element={<GameConnector />} 
+          element={<PrivateRoute><GameConnector /></PrivateRoute>} 
         />
         
         {/* Direct game lobby route (for testing) */}
         <Route 
           path="/lobby/:gameId" 
-          element={<EnhancedGameLobby />} 
+          element={<PrivateRoute><EnhancedGameLobby /></PrivateRoute>} 
         />
         
         {/* Debug Routes */}
-        <Route path="/debug/memory-game" element={<MemoryMatchTestEntry />} />
-        <Route path="/debug/wallet-test" element={<WalletTest />} />
+        <Route path="/debug/memory-game" element={<PrivateRoute><MemoryMatchTestEntry /></PrivateRoute>} />
+        <Route path="/debug/wallet-test" element={<PrivateRoute><WalletTest /></PrivateRoute>} />
         
-        <Route path="*" element={<GamesPage />} />
+        <Route path="*" element={<PrivateRoute><NotFound /></PrivateRoute>} />
         <Route path="/login" element={<GamingLoginMobile />} />
-        <Route path="/g" element={<TictactoeGameLogic />} />
+        {/* <Route path="/g" element={<PrivateRoute><TictactoeGameLogic /></PrivateRoute>} /> */}
         
       </Routes>
     </Router>

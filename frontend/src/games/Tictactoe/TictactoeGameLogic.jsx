@@ -304,7 +304,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
                 flex items-center justify-center 
                 w-20 h-20 text-4xl font-bold rounded-md
                 ${cell ? 'cursor-default' : 'cursor-pointer'}
-                ${cell === null ? 'bg-white/90 hover:bg-white/10' : 
+                ${cell === null ? 'bg-white/20 hover:bg-white/10' : 
                   cell === playerSymbols.player1 ? 'bg-blue-500/20 text-blue-400' : 
                   'bg-red-500/20 text-red-400'}
                 transition-all

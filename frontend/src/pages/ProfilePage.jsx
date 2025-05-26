@@ -1,7 +1,7 @@
 "use client"
 import Navbar from '../components/Navbar';
 import BottomNav from '../components/BottomNav';
-import { useState } from "react"
+import { useState, useEffect } from "react"
 // import {Link} from "react-router-dom";
 import {
   Bell,
@@ -36,8 +36,20 @@ import { Link } from "react-router-dom"
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const [openAccordion, setOpenAccordion] = useState(null)
+const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const toggleAccordion = (id) => {
+  useEffect(() => {
+    // Check if user exists in localStorage
+    const user = localStorage.getItem("user");
+    setIsLoggedIn(!!user); // Convert to boolean
+  }, []);
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+  };
+  const toggleAccordion = (id
+
+  ) => {
     setOpenAccordion(openAccordion === id ? null : id)
   }
 
@@ -305,10 +317,19 @@ export default function ProfilePage() {
                 <LogOut className="h-5 w-5" /> Logout
               </button> */}
 
-              <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2">
-                <Link to = "/login" className="h-5 w-5" > Login</Link>
-              </button>
+              {/* <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2">
+                
+              </button> */}
+ {isLoggedIn ? <button onClick={handleLogout} className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2" >
+      Logout
+    </button> : <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2" >
+      {/* {isLoggedIn ? "Logout" : "Login"} */}
+      <Link to = "/login" className="h-full w-full" > Login </Link>
+    </button>}
 
+    {/* <button className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center justify-center gap-2" >
+      <Link to = "/login" className="h-5 w-5" > Login </Link>
+    </button> */}
             </div>
           )}
 
