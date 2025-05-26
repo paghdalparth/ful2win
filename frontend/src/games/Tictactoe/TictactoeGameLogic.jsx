@@ -266,7 +266,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
     {/* <div className="flex flex-col items-center bg-red-400 justify-center h-full"> */}
     {/* <div className='h-full w-full items-center bg-black/40'> */}
       {/* Round indicator */}
-      <div className="bg-white/10  rounded-lg px-4 py-2 mb-6">
+      <div className="bg-white/40  rounded-lg px-4 py-2 mb-6">
         <div className="flex justify-between items-center w-64">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-400">
