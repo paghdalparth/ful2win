@@ -36,7 +36,9 @@ import { Link } from "react-router-dom"
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const [openAccordion, setOpenAccordion] = useState(null)
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [username, setUsername] = useState("GamerX123"); // State for the username
 
   useEffect(() => {
     // Check if user exists in localStorage
@@ -53,13 +55,27 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
     setOpenAccordion(openAccordion === id ? null : id)
   }
 
+  const handleEditUsernameClick = () => {
+    setIsEditingUsername(!isEditingUsername);
+  };
+
+  const handleUsernameChange = (event) => {
+    setUsername(event.target.value);
+  };
+
+  // Add a function to save the username (placeholder for actual save logic)
+  const saveUsername = () => {
+    console.log("Saving username:", username); // Replace with API call to save username
+    setIsEditingUsername(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-20">
       {/* Header */}
       <Navbar />
       
       {/* Profile Header */}
-      <div className="relative pt-16 px-4">
+      <div className="relative pt-24 px-4">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
             <div className="w-20 h-20 rounded-full border-2 border-purple-500 overflow-hidden bg-gray-700 flex items-center justify-center">
@@ -71,7 +87,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
           </div>
           
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">GamerX123</h1>
+            <h1 className="text-2xl font-bold">{username}</h1>
             <p className="text-purple-400 text-sm">Level 24 • 12,450 XP</p>
             
             <div className="mt-2 w-full bg-gray-700 rounded-full h-2">
@@ -160,23 +176,32 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
                   <h3 className="font-bold flex items-center gap-2">
                     <User className="text-purple-400" /> Account
                   </h3>
-                  <button className="text-purple-400 text-sm">Edit</button>
+                  <button onClick={handleEditUsernameClick} className="text-purple-400 text-sm">{isEditingUsername ? 'Cancel' : 'Edit'}</button>
                 </div>
                 <div className="divide-y divide-gray-700">
                   <div className="p-4 flex justify-between items-center">
                     <div>
                       <p className="text-sm text-gray-400">Username</p>
-                      <p>GamerX123</p>
+                      {isEditingUsername ? (
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={handleUsernameChange}
+                          className="bg-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                      ) : (
+                        <p>{username}</p>
+                      )}
                     </div>
-                    <Edit className="h-5 w-5 text-gray-400" />
+                    {isEditingUsername ? (
+                      <button onClick={saveUsername} className="text-green-400">
+                         <Check className="h-5 w-5" />
+                      </button>
+                    ) : (
+                       <Edit className="h-5 w-5 text-gray-400" />
+                    )}
                   </div>
-                  <div className="p-4 flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-gray-400">Email</p>
-                      <p>gamer.x123@example.com</p>
-                    </div>
-                    <Check className="h-5 w-5 text-green-400" />
-                  </div>
+                  
                   <div className="p-4 flex justify-between items-center">
                     <div>
                       <p className="text-sm text-gray-400">Phone</p>
