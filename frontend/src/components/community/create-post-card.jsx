@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react"
 import { PlusCircle, X, Send, Calendar, Tag, BarChart2, ImageIcon, Film, Music, Palette, UserPlus } from "lucide-react"
 
+const API_BASE_URL = "http://localhost:5000"; // Hardcoded for now to fix ReferenceError
+
 export default function CreatePostCard({
   createPost,
   setShowPollCreator,
@@ -63,7 +65,7 @@ export default function CreatePostCard({
   }
 
   // Handle post creation
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     if (
       (!newPostContent.trim() && !selectedFile && !screenshotPreview && !hasPoll && !selectedBackground && !gifUrl) ||
       (isScheduled && (!scheduleDate || !scheduleTime))
@@ -71,49 +73,73 @@ export default function CreatePostCard({
       return
     }
 
-    createPost({
+    // Get author name from local storage
+    const user = JSON.parse(localStorage.getItem('user'));
+    const authorName = user && user.fullName ? user.fullName : 'Anonymous'; // Use fullName or fallback
+
+    // Prepare post data for backend
+    const postData = {
+      title: newPostContent.trim().substring(0, 20) || "New Post", // Using content for title, adjust as needed
       content: newPostContent,
-      hasAttachment: !!selectedFile,
-      attachmentType: selectedFile ? selectedFile.type : null,
-      attachmentName: selectedFile ? selectedFile.name : null,
-      hasScreenshot: !!screenshotPreview,
-      hasPoll: hasPoll,
-      pollQuestion: hasPoll ? pollQuestion : null,
-      pollOptions: hasPoll ? pollOptions.filter((opt) => opt.trim()) : null,
-      allowMultipleVotes: hasPoll ? allowMultipleVotes : null,
-      taggedPeople: taggedPeople.length > 0 ? taggedPeople : null,
-      isScheduled: isScheduled,
-      scheduledFor: isScheduled ? `${scheduleDate} ${scheduleTime}` : null,
-      mediaType: mediaType,
-      backgroundStyle: selectedBackground ? selectedBackground.color : null,
-      musicUrl: musicUrl || null,
-      gifUrl: gifUrl || null,
-    })
+      author: authorName, // Use author name from local storage
+      // Note: File, screenshot, poll, tags, schedule, media type, background, music, gif
+      // are not included in this basic backend integration based on postRoutes.js structure.
+      // You would need to modify the backend to handle these.
+    };
 
-    // Reset all states
-    setNewPostContent("")
-    setSelectedFile(null)
-    setScreenshotPreview(null)
-    setHasPoll(false)
-    setPollQuestion("")
-    setPollOptions(["", ""])
-    setAllowMultipleVotes(false)
-    setTaggedPeople([])
-    setIsScheduled(false)
-    setScheduleDate("")
-    setScheduleTime("")
-    setMediaType(null)
-    setSelectedBackground(null)
-    setMusicUrl("")
-    setGifUrl("")
-    setShowMediaOptions(false)
-    if (imageInputRef.current) imageInputRef.current.value = ""
-    if (videoInputRef.current) videoInputRef.current.value = ""
-    if (musicInputRef.current) musicInputRef.current.value = ""
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/post/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include authorization header if your backend requires it
+          // 'Authorization': `Bearer ${yourAuthToken}`,
+        },
+        body: JSON.stringify(postData),
+      });
 
-    // Hide the create post card after posting
-    if (toggleVisibility) {
-      toggleVisibility()
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create post');
+      }
+
+      const createdPost = await response.json();
+      console.log('Post created successfully:', createdPost);
+
+      // You might want to call a function passed from parent to update the UI with the new post
+      // if (createPost) {
+      //   createPost(createdPost);
+      // }
+
+      // Reset all states on successful post
+      setNewPostContent("")
+      setSelectedFile(null)
+      setScreenshotPreview(null)
+      setHasPoll(false)
+      setPollQuestion("")
+      setPollOptions(["", ""])
+      setAllowMultipleVotes(false) // Assuming this state exists for poll options
+      setTaggedPeople([])
+      setIsScheduled(false) // Assuming this state exists for scheduling
+      setScheduleDate("") // Assuming this state exists for scheduling
+      setScheduleTime("") // Assuming this state exists for scheduling
+      setMediaType(null)
+      setSelectedBackground(null)
+      setMusicUrl("") // Assuming this state exists for music
+      setGifUrl("") // Assuming this state exists for gifs
+      setShowMediaOptions(false)
+      if (imageInputRef.current) imageInputRef.current.value = ""
+      if (videoInputRef.current) videoInputRef.current.value = ""
+      if (musicInputRef.current) musicInputRef.current.value = ""
+
+      // Hide the create post card after posting
+      if (toggleVisibility) {
+        toggleVisibility()
+      }
+
+    } catch (error) {
+      console.error('Error creating post:', error);
+      // Display an error message to the user (you'll need state for this)
     }
   }
 

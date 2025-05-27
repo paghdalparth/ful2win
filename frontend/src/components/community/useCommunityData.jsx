@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 // Mock data for the community
 const initialUsers = [
@@ -43,7 +43,7 @@ const initialAnnouncements = [
   {
     id: 1,
     title: "New Feature Released",
-    content: "We’ve added game scheduling! Try it out.",
+    content: "We've added game scheduling! Try it out.",
     timestamp: "2025-05-15T12:00:00+05:30",
   },
 ]
@@ -73,10 +73,12 @@ const initialGameOptions = [
   { id: 5, name: "Shooter" },
 ]
 
+const API_BASE_URL = "http://localhost:5000"; // Hardcoded for now
+
 export function useCommunityData() {
   const [users, setUsers] = useState(initialUsers)
   const [filteredUsers, setFilteredUsers] = useState(null) // For filtering users (e.g., by online status)
-  const [posts, setPosts] = useState(initialPosts)
+  const [posts, setPosts] = useState([]) // Initialize posts as an empty array
   const [playerStats] = useState(initialPlayerStats)
   const [achievements] = useState(initialAchievements)
   const [events, setEvents] = useState(initialEvents)
@@ -85,6 +87,32 @@ export function useCommunityData() {
   const [gameOptions] = useState(initialGameOptions)
   const [follows, setFollows] = useState({}) // e.g., { userId: [followedUserIds] }
   const [chats, setChats] = useState({}) // e.g., { userId: [{ senderId, message, timestamp }] }
+
+  // Fetch posts from the backend
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/post/posts`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+        const data = await response.json();
+        // Ensure data is an array before setting state
+        if (Array.isArray(data)) {
+          setPosts(data);
+        } else {
+          console.error("Fetched data is not an array:", data);
+          setPosts([]); // Fallback to empty array
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]); // Set to empty array on error
+        // You might want to set an error state here to display a message in the UI
+      }
+    };
+
+    fetchPosts();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Add a comment to a post
   const addPostComment = (postId, userId, content) => {
@@ -108,34 +136,94 @@ export function useCommunityData() {
     )
   }
 
-  // Toggle like on a post
-  const toggleLikePost = (postId, userId) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              likes: post.likes.includes(userId)
-                ? post.likes.filter((id) => id !== userId)
-                : [...post.likes, userId],
-            }
-          : post
-      )
-    )
-  }
+  // Toggle like on a post (Modified to call backend)
+  const toggleLikePost = async (postId, userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/post/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include authorization header if your backend requires it
+          // 'Authorization': `Bearer ${yourAuthToken}`,
+        },
+        body: JSON.stringify({ userId }), // Send userId in the body
+      });
 
-  // Create a new post
-  const createPost = (postData) => {
-    const newPost = {
-      id: posts.length + 1,
-      userId: postData.userId || 1, // Default to user 1 (Alex) for demo
-      content: postData.content,
-      timestamp: new Date().toISOString(),
-      likes: [],
-      comments: [],
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to toggle like on backend');
+      }
+
+      const updatedPost = await response.json();
+      console.log('Like toggled successfully:', updatedPost);
+
+      // Update the posts state with the updated post
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === updatedPost._id ? updatedPost : post
+        )
+      );
+
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      // You might want to set an error state here to display a message in the UI
     }
-    setPosts((prevPosts) => [newPost, ...prevPosts])
-    return Promise.resolve(newPost) // Simulate async operation
+  };
+
+  // Create a new post (Modified to call backend and refetch)
+  const createPost = async (postData) => {
+    try {
+       // Get author name from local storage
+      const user = JSON.parse(localStorage.getItem('user'));
+      const authorName = user && user.fullName ? user.fullName : 'Anonymous'; // Use fullName or fallback
+
+      const postToSend = {
+        title: postData.content.trim().substring(0, 20) || "New Post", // Using content for title, adjust as needed
+        content: postData.content,
+        author: authorName, // Use author name from local storage
+        // Note: File, screenshot, poll, tags, schedule, media type, background, music, gif
+        // are not included in this basic backend integration based on postRoutes.js structure.
+        // You would need to modify the backend to handle these.
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/post/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include authorization header if your backend requires it
+          // 'Authorization': `Bearer ${yourAuthToken}`,
+        },
+        body: JSON.stringify(postToSend),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create post on backend');
+      }
+
+      const newPost = await response.json();
+      console.log('Post created successfully on backend:', newPost);
+
+      // Refetch posts after creating a new one to update the list
+      const fetchResponse = await fetch(`${API_BASE_URL}/api/post/posts`);
+       if (!fetchResponse.ok) {
+          throw new Error('Failed to refetch posts after creation');
+        }
+       const updatedPosts = await fetchResponse.json();
+        if (Array.isArray(updatedPosts)) {
+          setPosts(updatedPosts);
+        } else {
+           console.error("Refetched data is not an array:", updatedPosts);
+        }
+
+      // You might still want to return the new post or a success indicator
+      return newPost; 
+
+    } catch (error) {
+      console.error('Error creating post or refetching:', error);
+       // You might want to set an error state here to display a message in the UI
+      throw error; // Re-throw the error so the calling component can handle it
+    }
   }
 
   // Send a game invite (simulated)

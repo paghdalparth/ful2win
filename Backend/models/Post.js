@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: String,
   author: String,
-  likes: { type: Number, default: 0 },
+  likes: [{ type: mongoose.Schema.Types.String, ref: 'User' }],
   comments: [commentSchema],
   createdAt: { type: Date, default: Date.now }
 });

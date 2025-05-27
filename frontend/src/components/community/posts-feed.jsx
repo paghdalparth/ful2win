@@ -41,48 +41,39 @@ export default function PostsFeed({
       {/* Posts List */}
       {posts.length > 0 ? (
         posts.map((post) => {
-          const author = users.find((u) => u.id === post.userId) || {
-            name: "Unknown User",
-            avatar: "/images/games/h1.jpg",
-          }
-          const isUserFollowing = isFollowing ? isFollowing(author.id) : false
+          const authorName = post.author || "Unknown User"
+          const authorAvatar = "/images/avatars/default-avatar.jpg"
 
           return (
             <div
-              key={post.id}
+              key={post._id}
               className="post-card bg-white rounded-lg shadow-md text-gray-900 border border-gray-200 hover:shadow-lg transition-shadow duration-300 animate-fade-in-up overflow-visible"
             >
               {/* Post Header */}
               <div className="post-header flex items-center gap-10 p-1 border-b border-gray-100">
                 <img
-                  src={author.avatar || "/images/avatars/default-avatar.jpg"}
-                  alt={`${author.name}'s avatar`}
+                  src={authorAvatar}
+                  alt={`${authorName}'s avatar`}
                   className="post-avatar w-10 h-10 sm:w-12 sm:h-12 rounded-full cursor-pointer transition-transform duration-300 hover:scale-105 object-cover"
-                  onClick={() => handleProfileClick(author.id)}
                 />
                 <div className="flex flex-row gap-10">
                   <div className="flex items-center gap-8">
                     <h3
-                      className="post-author text-sm sm:text-base font-semibold text-gray-900 leading-tight hover:text-blue-600 cursor-pointer transition-colors duration-300"
-                      onClick={() => handleProfileClick(author.id)}
+                      className="post-author text-sm sm:text-base font-semibold text-gray-900 leading-tight hover:text-blue-600 transition-colors duration-300"
                     >
-                      {author.name}
+                      {authorName}
                     </h3>
-                    <p className="post-time text-sm text-gray-500">{formatDate(post.timestamp)}</p>
+                    <p className="post-time text-sm text-gray-500">{formatDate(post.createdAt)}</p>
                   </div>
                   {toggleFollow && (
                     <button
-                      onClick={() => toggleFollow(author.id)}
-                      className={`self-start flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-xs font-medium text-white transition-all duration-300 focus:ring-1 focus:ring-blue-600 focus:ring-offset-1 hover:scale-105 transform ${
-                        isUserFollowing
-                          ? "bg-gray-400 hover:bg-gray-500"
-                          : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                      }`}
-                      aria-label={isUserFollowing ? "Unfollow user" : "Follow user"}
-                      aria-pressed={isUserFollowing}
+                      onClick={() => console.log('Follow button clicked for author:', authorName)}
+                      className={`self-start flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-xs font-medium text-white transition-all duration-300 focus:ring-1 focus:ring-blue-600 focus:ring-offset-1 hover:scale-105 transform bg-blue-600 hover:bg-blue-700`}
+                      aria-label={`Follow ${authorName}`}
+                      aria-pressed={false}
                     >
                       <UserPlus size={12} />
-                      <span>{isUserFollowing ? "Unfollow" : "Follow"}</span>
+                      <span>Follow</span>
                     </button>
                   )}
                 </div>
@@ -99,7 +90,7 @@ export default function PostsFeed({
                 {post.mediaType === "photo" && post.hasAttachment && (
                   <div className="mt-2 bg-black rounded-lg overflow-hidden">
                     <img
-                      src={`/images/media/photos/photo${post.id}.jpg`}
+                      src={`/images/media/photos/photo${post._id}.jpg`}
                       alt="Photo"
                       className="w-full object-contain max-h-[200px] sm:max-h-[300px]"
                       loading="lazy"
@@ -111,7 +102,7 @@ export default function PostsFeed({
                 {post.mediaType === "video" && post.hasAttachment && (
                   <div className="mt-2 bg-black rounded-lg overflow-hidden">
                     <video
-                      src={`/images/media/videos/video${post.id}.mp4`}
+                      src={`/images/media/videos/video${post._id}.mp4`}
                       controls
                       className="w-full max-h-[200px] sm:max-h-[300px]"
                       onError={(e) => (e.target.src = "/images/avatars/default-avatar.jpg")}
@@ -157,26 +148,26 @@ export default function PostsFeed({
 
               <div className="social-actions-row bg-gray-100 p-2 flex justify-between items-center">
                 <button
-                  onClick={() => toggleLikePost(post.id)}
+                  onClick={() => toggleLikePost(post._id)}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                    post.likes.includes(1) ? "text-red-500 hover:text-red-600" : "text-gray-600 hover:text-blue-600"
+                    post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "text-red-500 hover:text-red-600" : "text-gray-600 hover:text-blue-600"
                   }`}
-                  aria-label={post.likes.includes(1) ? "Unlike post" : "Like post"}
+                  aria-label={post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "Unlike post" : "Like post"}
                 >
                   <Heart
                     className="h-5 w-5"
-                    fill={post.likes.includes(1) ? "currentColor" : "none"}
+                    fill={post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "currentColor" : "none"}
                     stroke="currentColor"
                   />
-                  <span className="text-sm">{post.likes.length}</span>
+                  <span className="text-sm">{post.likes?.length || 0}</span>
                 </button>
 
                 <button
-                  onClick={() => toggleComments(post.id)}
+                  onClick={() => toggleComments(post._id)}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                    showComments[post.id] ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
+                    showComments[post._id] ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
                   }`}
-                  aria-label={showComments[post.id] ? "Hide comments" : "Show comments"}
+                  aria-label={showComments[post._id] ? "Hide comments" : "Show comments"}
                 >
                   <MessageCircle className="h-5 w-5 text-blue-500" />
                   <span className="text-sm">{post.comments?.length || 0}</span>
@@ -193,36 +184,33 @@ export default function PostsFeed({
               </div>
 
               {/* Comments Section - Hidden by default */}
-              <div className={`post-comments border-t border-gray-200 ${showComments[post.id] ? "block" : "hidden"}`}>
+              <div className={`post-comments border-t border-gray-200 ${showComments[post._id] ? "block" : "hidden"}`}>
                 {post.comments && post.comments.length > 0 && (
                   <div className="p-1 space-y-1">
                     <h4 className="text-sm font-semibold text-blue-700">
                       {post.comments.length} Comment{post.comments.length !== 1 && "s"}
                     </h4>
                     {post.comments.map((comment) => {
-                      const commentAuthor = users.find((u) => u.id === comment.userId) || {
-                        name: "Unknown User",
-                        avatar: "/images/h1.jpg",
-                      }
+                      const commentAuthorName = comment.user || "Unknown User"
+                      const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
+
                       return (
-                        <div key={comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
+                        <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
                           <img
-                            src={commentAuthor.avatar || "/images/h1.jpg"}
-                            alt={`${commentAuthor.name}'s avatar`}
+                            src={commentAuthorAvatar}
+                            alt={`${commentAuthorName}'s avatar`}
                             className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
-                            onClick={() => handleProfileClick(commentAuthor.id)}
                           />
                           <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
                             <div className="flex justify-between items-start">
                               <h5
                                 className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
-                                onClick={() => handleProfileClick(commentAuthor.id)}
                               >
-                                {commentAuthor.name}
+                                {commentAuthorName}
                               </h5>
-                              <span className="text-xs text-gray-500">{formatDate(comment.timestamp)}</span>
+                              <span className="text-xs text-gray-500">{formatDate(comment.date)}</span>
                             </div>
-                            <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                            <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
                           </div>
                         </div>
                       )
@@ -233,27 +221,27 @@ export default function PostsFeed({
                 <div className="comment-form flex items-center gap-2 p-1">
                   <input
                     type="text"
-                    value={newPostComment[post.id] || ""}
-                    onChange={(e) => setNewPostComment({ ...newPostComment, [post.id]: e.target.value })}
+                    value={newPostComment[post._id] || ""}
+                    onChange={(e) => setNewPostComment({ ...newPostComment, [post._id]: e.target.value })}
                     placeholder="Write a comment..."
                     className="comment-input flex-1 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-300"
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && newPostComment[post.id]?.trim()) {
-                        addPostComment(post.id, newPostComment[post.id])
-                        setNewPostComment({ ...newPostComment, [post.id]: "" })
+                      if (e.key === "Enter" && newPostComment[post._id]?.trim()) {
+                        addPostComment(post._id, 'currentUserIdPlaceholder', newPostComment[post._id])
+                        setNewPostComment({ ...newPostComment, [post._id]: "" })
                       }
                     }}
                   />
                   <button
                     onClick={() => {
-                      if (newPostComment[post.id]?.trim()) {
-                        addPostComment(post.id, newPostComment[post.id])
-                        setNewPostComment({ ...newPostComment, [post.id]: "" })
+                      if (newPostComment[post._id]?.trim()) {
+                        addPostComment(post._id, 'currentUserIdPlaceholder', newPostComment[post._id])
+                        setNewPostComment({ ...newPostComment, [post._id]: "" })
                       }
                     }}
-                    disabled={!newPostComment[post.id]?.trim()}
+                    disabled={!newPostComment[post._id]?.trim()}
                     className={`comment-button p-2 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                      newPostComment[post.id]?.trim()
+                      newPostComment[post._id]?.trim()
                         ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
