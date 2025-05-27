@@ -762,7 +762,7 @@ const handleLogin = async (e) => {
         >
           <h1 className="text-4xl font-extrabold tracking-tight">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-red-500 animate-gradient">
-              GAME ZONE
+              FUL2WIN
             </span>
           </h1>
           <motion.div
@@ -771,8 +771,8 @@ const handleLogin = async (e) => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            <span className="text-blue-400">PLAY.</span> <span className="text-purple-400">WIN.</span>{" "}
-            <span className="text-red-400">EARN.</span>
+            <span className="text-blue-400">Entertainment.</span> <span className="text-purple-400">Earning.</span>{" "}
+            <span className="text-red-400">Fame.</span>
           </motion.div>
         </motion.div>
 
@@ -1071,7 +1071,7 @@ const handleLogin = async (e) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          © 2023 Game Zone. All rights reserved.
+          © 2023 Ful2win. All rights reserved.
         </motion.div>
       </motion.div>
     </div>
