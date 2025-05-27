@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Gamepad2, Users, Clock, Coins, IndianRupee, Trophy, Zap, Star, Crown, Target, ArrowRight, Flame } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const games = [
   {
@@ -18,6 +19,7 @@ const games = [
     ongoingMatches: 18,
     topPrize: '₹5,000',
     icon: '♞',
+    path: '/games/chess'
   },
   {
     id: 2,
@@ -35,6 +37,7 @@ const games = [
     ongoingMatches: 25,
     topPrize: '₹3,000',
     icon: '🎲',
+    path: '/games/ludo'
   },
   {
     id: 3,
@@ -52,6 +55,7 @@ const games = [
     ongoingMatches: 12,
     topPrize: '₹4,000',
     icon: '🎯',
+    path: '/games/carrom'
   },
   {
     id: 4,
@@ -69,6 +73,7 @@ const games = [
     ongoingMatches: 35,
     topPrize: '₹15,000',
     icon: '🎮',
+    path: '/games/bgmi'
   },
   {
     id: 5,
@@ -86,6 +91,7 @@ const games = [
     ongoingMatches: 28,
     topPrize: '₹10,000',
     icon: '🎯',
+    path: '/games/freefire'
   },
 ];
 
@@ -93,6 +99,7 @@ export default function PopularGames() {
   const [activeTab, setActiveTab] = useState('real');
   const [hoveredGame, setHoveredGame] = useState(null);
   const canvasRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -366,6 +373,7 @@ export default function PopularGames() {
                 <div className="flex gap-3 w-full">
                   <button 
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-700 text-white font-bold py-3 px-5 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+                    onClick={() => navigate(game.path)}
                   >
                     <span>
                     {activeTab === 'real' ? 'Play Now' : 'Practice'}

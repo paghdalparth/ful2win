@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react';
 import { Trophy, Users, Clock, Gift, Shield, Zap, Headphones, Play, ChevronLeft, ChevronRight, TrendingUp, Star, Coins } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const gameSlides = [
   {
     name: 'Ludo Championship',
     image: '/images/ludo.jpg',
     subtitle: 'Roll the dice and win big',
+    path: '/games/ludo'
   },
   {
     name: 'Chess Masters',
     image: '/images/chess.jpg',
     subtitle: 'Outsmart your opponent',
+    path: '/games/chess'
   },
   {
     name: 'Carrom Clash',
     image: '/images/carrom.jpg',
     subtitle: 'Strike and pocket to victory',
+    path: '/games/carrom'
   },
   {
     name: 'PUBG Showdown',
     image: '/images/pubg.jpg',
     subtitle: 'Battle for survival',
+    path: '/games/bgmi'
   },
   {
     name: 'Free Fire Frenzy',
     image: '/images/freefire.jpg',
     subtitle: 'Fast-paced action',
+    path: '/games/freefire'
   },
 ];
 
@@ -37,6 +43,7 @@ export default function HeroSection() {
     dailyWinners: 0,
     jackpotAmount: 0
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -127,7 +134,10 @@ export default function HeroSection() {
             <p className="text-lg md:text-xl text-center text-white/80 mb-6 animate-fade-in-up delay-100">
               {slide.subtitle}
             </p>
-            <button className="px-10 py-4 rounded-2xl font-extrabold text-lg md:text-2xl flex items-center gap-3 bg-white/90 text-purple-600 shadow-xl hover:scale-105 transition-all duration-200 animate-pulse-glow">
+            <button 
+              className="px-10 py-4 rounded-2xl font-extrabold text-lg md:text-2xl flex items-center gap-3 bg-white/90 text-purple-600 shadow-xl hover:scale-105 transition-all duration-200 animate-pulse-glow"
+              onClick={() => navigate(slide.path)}
+            >
               <Play className="h-6 w-6" />
               Play Now
             </button>

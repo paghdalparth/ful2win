@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, IndianRupee, Clock, Trophy, Flame, ArrowRight, Target, Crown, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const tournaments = [
   {
@@ -13,6 +14,7 @@ const tournaments = [
     entryFee: '₹500',
     color: 'from-orange-600 to-red-700',
     icon: '🎮',
+    path: '/games/bgmi'
   },
   {
     id: 2,
@@ -25,6 +27,7 @@ const tournaments = [
     entryFee: '₹300',
     color: 'from-yellow-600 to-orange-700',
     icon: '🎯',
+    path: '/games/freefire'
   },
   {
     id: 3,
@@ -37,6 +40,7 @@ const tournaments = [
     entryFee: '₹200',
     color: 'from-blue-600 to-blue-800',
     icon: '♞',
+    path: '/games/chess'
   },
 ];
 
@@ -132,8 +136,10 @@ function CountdownTimer({ date, endDate }) {
 }
 
 export default function FeaturedTournaments() {
-  // For demo purposes, set one past tournament
   const [currentTime] = useState(new Date());
+  const navigate = useNavigate();
+  
+  // For demo purposes, set one past tournament
   const pastTournament = {
     ...tournaments[0], 
     date: new Date(currentTime.getTime() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
@@ -283,6 +289,7 @@ export default function FeaturedTournaments() {
                 <div className="flex gap-3">
                   <button 
                     className={`flex-1 ${new Date(tournament.date) <= currentTime ? 'bg-gradient-to-r from-green-600 to-teal-700' : 'bg-gradient-to-r from-blue-600 to-purple-700'} text-white font-bold py-3 px-5 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2`}
+                    onClick={() => navigate(tournament.path)}
                   >
                     {new Date(tournament.date) <= currentTime ? (
                       <>
