@@ -13,7 +13,7 @@ const tournaments = [
     participants: 256,
     entryFee: '₹500',
     color: 'from-orange-600 to-red-700',
-    icon: '🎮',
+    icon: '/pubgicon.png',
     path: '/games/bgmi'
   },
   {
@@ -26,7 +26,7 @@ const tournaments = [
     participants: 128,
     entryFee: '₹300',
     color: 'from-yellow-600 to-orange-700',
-    icon: '🎯',
+    icon: '/freefireicon.png',
     path: '/games/freefire'
   },
   {
@@ -214,7 +214,11 @@ export default function FeaturedTournaments() {
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/10">
-                      <span className="text-2xl">{tournament.icon}</span>
+                      {tournament.icon.startsWith('/') ? (
+                        <img src={tournament.icon} alt={tournament.game} className="w-8 h-8 object-contain" />
+                      ) : (
+                        <span className="text-2xl">{tournament.icon}</span>
+                      )}
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">{tournament.name}</h3>

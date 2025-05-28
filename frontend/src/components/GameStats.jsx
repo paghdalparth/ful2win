@@ -27,7 +27,7 @@ const games = [
     ongoingMatches: 12,
     topPrize: '₹4,000',
     color: 'from-green-500 to-green-700',
-    icon: '🎯',
+    icon: '/carromicon.png',
   },
   {
     id: 4,
@@ -36,7 +36,7 @@ const games = [
     ongoingMatches: 35,
     topPrize: '₹10,000',
     color: 'from-yellow-500 to-orange-700',
-    icon: '🎮',
+    icon: '/freefireicon.png',
   },
   {
     id: 5,
@@ -45,7 +45,7 @@ const games = [
     ongoingMatches: 28,
     topPrize: '₹15,000',
     color: 'from-red-500 to-red-700',
-    icon: '🎯',
+    icon: '/pubgicon.png',
   },
   {
     id: 6,
@@ -325,7 +325,13 @@ export default function GameStats() {
                   <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
-                        <span className="text-3xl mr-3">{game.icon}</span>
+                        <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/10">
+                          {game.icon.startsWith('/') ? (
+                            <img src={game.icon} alt={game.name} className="w-8 h-8 object-contain" />
+                          ) : (
+                            <span className="text-2xl">{game.icon}</span>
+                          )}
+                        </div>
                         <h3 className="text-xl font-bold text-white">{game.name}</h3>
                       </div>
                       <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${game.color} text-white text-sm font-medium`}>

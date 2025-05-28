@@ -54,7 +54,7 @@ const games = [
     activePlayers: 156,
     ongoingMatches: 12,
     topPrize: '₹4,000',
-    icon: '🎯',
+    icon: '/carromicon.png',
     path: '/games/carrom'
   },
   {
@@ -72,7 +72,7 @@ const games = [
     activePlayers: 432,
     ongoingMatches: 35,
     topPrize: '₹15,000',
-    icon: '🎮',
+    icon: '/pubgicon.png',
     path: '/games/bgmi'
   },
   {
@@ -90,7 +90,7 @@ const games = [
     activePlayers: 389,
     ongoingMatches: 28,
     topPrize: '₹10,000',
-    icon: '🎯',
+    icon: '/freefireicon.png',
     path: '/games/freefire'
   },
 ];
@@ -279,7 +279,11 @@ export default function PopularGames() {
                     <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/10"
                       style={{ transform: hoveredGame === game.id ? 'scale(1.05)' : 'scale(1)' }}
                     >
-                      <span className="text-2xl">{game.icon}</span>
+                      {game.icon.startsWith('/') ? (
+                        <img src={game.icon} alt={game.name} className="w-8 h-8 object-contain" />
+                      ) : (
+                        <span className="text-2xl">{game.icon}</span>
+                      )}
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white mb-1">{game.name}</h3>
