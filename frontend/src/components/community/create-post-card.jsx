@@ -112,29 +112,29 @@ export default function CreatePostCard({
       // }
 
       // Reset all states on successful post
-      setNewPostContent("")
-      setSelectedFile(null)
-      setScreenshotPreview(null)
-      setHasPoll(false)
-      setPollQuestion("")
-      setPollOptions(["", ""])
+    setNewPostContent("")
+    setSelectedFile(null)
+    setScreenshotPreview(null)
+    setHasPoll(false)
+    setPollQuestion("")
+    setPollOptions(["", ""])
       setAllowMultipleVotes(false) // Assuming this state exists for poll options
-      setTaggedPeople([])
+    setTaggedPeople([])
       setIsScheduled(false) // Assuming this state exists for scheduling
       setScheduleDate("") // Assuming this state exists for scheduling
       setScheduleTime("") // Assuming this state exists for scheduling
-      setMediaType(null)
-      setSelectedBackground(null)
+    setMediaType(null)
+    setSelectedBackground(null)
       setMusicUrl("") // Assuming this state exists for music
       setGifUrl("") // Assuming this state exists for gifs
-      setShowMediaOptions(false)
-      if (imageInputRef.current) imageInputRef.current.value = ""
-      if (videoInputRef.current) videoInputRef.current.value = ""
-      if (musicInputRef.current) musicInputRef.current.value = ""
+    setShowMediaOptions(false)
+    if (imageInputRef.current) imageInputRef.current.value = ""
+    if (videoInputRef.current) videoInputRef.current.value = ""
+    if (musicInputRef.current) musicInputRef.current.value = ""
 
-      // Hide the create post card after posting
-      if (toggleVisibility) {
-        toggleVisibility()
+    // Hide the create post card after posting
+    if (toggleVisibility) {
+      toggleVisibility()
       }
 
     } catch (error) {

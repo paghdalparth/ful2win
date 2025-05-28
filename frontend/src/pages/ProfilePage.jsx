@@ -36,18 +36,20 @@ import { Link } from "react-router-dom"
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const [openAccordion, setOpenAccordion] = useState(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [username, setUsername] = useState("GamerX123"); // State for the username
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Check if user exists in localStorage
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user); // Convert to boolean
+    // Get user data from localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+    setIsLoggedIn(!!user);
+    setUserData(user);
   }, []);
   const handleLogout = () => {
     localStorage.removeItem("user");
     setIsLoggedIn(false);
+    setUserData(null);
   };
   const toggleAccordion = (id
 
@@ -60,12 +62,12 @@ export default function ProfilePage() {
   };
 
   const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
+    setUserData({...userData, fullName: event.target.value});
   };
 
   // Add a function to save the username (placeholder for actual save logic)
   const saveUsername = () => {
-    console.log("Saving username:", username); // Replace with API call to save username
+    console.log("Saving username:", userData); // Replace with API call to save username
     setIsEditingUsername(false);
   };
 
@@ -87,7 +89,7 @@ export default function ProfilePage() {
           </div>
           
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{username}</h1>
+            <h1 className="text-2xl font-bold">{userData?.fullName || "Guest User"}</h1>
             <p className="text-purple-400 text-sm">Level 24 • 12,450 XP</p>
             
             <div className="mt-2 w-full bg-gray-700 rounded-full h-2">
@@ -185,12 +187,12 @@ export default function ProfilePage() {
                       {isEditingUsername ? (
                         <input
                           type="text"
-                          value={username}
-                          onChange={handleUsernameChange}
+                          value={userData?.fullName || ""}
+                          onChange={(e) => setUserData({...userData, fullName: e.target.value})}
                           className="bg-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
                         />
                       ) : (
-                        <p>{username}</p>
+                        <p>{userData?.fullName || "Guest User"}</p>
                       )}
                     </div>
                     {isEditingUsername ? (
@@ -198,14 +200,14 @@ export default function ProfilePage() {
                          <Check className="h-5 w-5" />
                       </button>
                     ) : (
-                       <Edit className="h-5 w-5 text-gray-400" />
+                    <Edit className="h-5 w-5 text-gray-400" />
                     )}
                   </div>
                   
                   <div className="p-4 flex justify-between items-center">
                     <div>
                       <p className="text-sm text-gray-400">Phone</p>
-                      <p>+91 98765 43210</p>
+                      <p>{userData?.phoneNumber ? `+91 ${userData.phoneNumber}` : "Not available"}</p>
                     </div>
                     <Check className="h-5 w-5 text-green-400" />
                   </div>

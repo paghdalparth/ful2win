@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Heart, MessageCircle, Send, PlusCircle, Share, UserPlus } from "lucide-react"
 
 export default function PostsFeed({
@@ -16,6 +16,13 @@ export default function PostsFeed({
 }) {
   const [newPostComment, setNewPostComment] = useState({})
   const [showComments, setShowComments] = useState({}) // Comments hidden by default
+  const [currentUser, setCurrentUser] = useState(null)
+
+  // Get current user from localStorage on component mount
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setCurrentUser(user);
+  }, []);
 
   // Toggle comments visibility for a specific post
   const toggleComments = (postId) => {
@@ -24,6 +31,45 @@ export default function PostsFeed({
       [postId]: !prev[postId],
     }))
   }
+
+  // Handle like button click
+  const handleLikeClick = (postId) => {
+    if (!currentUser) {
+      // You might want to show a login prompt or redirect to login
+      console.log('Please login to like posts');
+      return;
+    }
+    toggleLikePost(postId, currentUser._id);
+  }
+
+  // Handle comment submission
+  const handleCommentSubmit = (postId, content) => {
+    if (!currentUser) {
+      // You might want to show a login prompt or redirect to login
+      console.log('Please login to comment');
+      return;
+    }
+    if (content.trim()) {
+      addPostComment(postId, currentUser._id, content.trim());
+      setNewPostComment({ ...newPostComment, [postId]: "" });
+    }
+  }
+
+  // Add this function near the top of the component, after the state declarations
+  const getCommentAuthorName = (comment) => {
+    // If the comment has a user field (from backend), use that
+    if (comment.user) {
+      return comment.user;
+    }
+    
+    // If we have a current user and the comment is from them, use their name
+    if (currentUser && comment.userId === currentUser._id) {
+      return currentUser.fullName || 'You';
+    }
+    
+    // Fallback to "Unknown User"
+    return "Unknown User";
+  };
 
   return (
     <div className="space-y-1 sm:px-0">
@@ -148,15 +194,25 @@ export default function PostsFeed({
 
               <div className="social-actions-row bg-gray-100 p-2 flex justify-between items-center">
                 <button
-                  onClick={() => toggleLikePost(post._id)}
+                  onClick={() => handleLikeClick(post._id)}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                    post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "text-red-500 hover:text-red-600" : "text-gray-600 hover:text-blue-600"
+                    post.likes && Array.isArray(post.likes) && currentUser && post.likes.includes(currentUser._id) 
+                      ? "text-red-500 hover:text-red-600" 
+                      : "text-gray-600 hover:text-blue-600"
                   }`}
-                  aria-label={post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "Unlike post" : "Like post"}
+                  aria-label={
+                    post.likes && Array.isArray(post.likes) && currentUser && post.likes.includes(currentUser._id) 
+                      ? "Unlike post" 
+                      : "Like post"
+                  }
                 >
                   <Heart
                     className="h-5 w-5"
-                    fill={post.likes && Array.isArray(post.likes) && post.likes.includes('currentUserIdPlaceholder') ? "currentColor" : "none"}
+                    fill={
+                      post.likes && Array.isArray(post.likes) && currentUser && post.likes.includes(currentUser._id) 
+                        ? "currentColor" 
+                        : "none"
+                    }
                     stroke="currentColor"
                   />
                   <span className="text-sm">{post.likes?.length || 0}</span>
@@ -184,73 +240,70 @@ export default function PostsFeed({
               </div>
 
               {/* Comments Section - Hidden by default */}
-              <div className={`post-comments border-t border-gray-200 ${showComments[post._id] ? "block" : "hidden"}`}>
-                {post.comments && post.comments.length > 0 && (
-                  <div className="p-1 space-y-1">
-                    <h4 className="text-sm font-semibold text-blue-700">
-                      {post.comments.length} Comment{post.comments.length !== 1 && "s"}
-                    </h4>
-                    {post.comments.map((comment) => {
-                      const commentAuthorName = comment.user || "Unknown User"
-                      const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
+              {showComments[post._id] && (
+                <div className="comments-section mt-4">
+                  {post.comments && post.comments.length > 0 && (
+                    <div className="p-1 space-y-1">
+                      <h4 className="text-sm font-semibold text-blue-700">
+                        {post.comments.length} Comment{post.comments.length !== 1 && "s"}
+                      </h4>
+                      {post.comments.map((comment) => {
+                        const commentAuthorName = getCommentAuthorName(comment);
+                        const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
 
-                      return (
-                        <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
-                          <img
-                            src={commentAuthorAvatar}
-                            alt={`${commentAuthorName}'s avatar`}
-                            className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
-                          />
-                          <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
-                            <div className="flex justify-between items-start">
-                              <h5
-                                className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
-                              >
-                                {commentAuthorName}
-                              </h5>
-                              <span className="text-xs text-gray-500">{formatDate(comment.date)}</span>
+                        return (
+                          <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
+                            <img
+                              src={commentAuthorAvatar}
+                              alt={`${commentAuthorName}'s avatar`}
+                              className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
+                            />
+                            <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
+                              <div className="flex justify-between items-start">
+                                <h5
+                                  className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
+                                >
+                                  {commentAuthorName}
+                                </h5>
+                                <span className="text-xs text-gray-500">{formatDate(comment.date)}</span>
+                              </div>
+                              <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
                             </div>
-                            <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                        )
+                      })}
+                    </div>
+                  )}
 
-                <div className="comment-form flex items-center gap-2 p-1">
-                  <input
-                    type="text"
-                    value={newPostComment[post._id] || ""}
-                    onChange={(e) => setNewPostComment({ ...newPostComment, [post._id]: e.target.value })}
-                    placeholder="Write a comment..."
-                    className="comment-input flex-1 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-300"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && newPostComment[post._id]?.trim()) {
-                        addPostComment(post._id, 'currentUserIdPlaceholder', newPostComment[post._id])
-                        setNewPostComment({ ...newPostComment, [post._id]: "" })
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      if (newPostComment[post._id]?.trim()) {
-                        addPostComment(post._id, 'currentUserIdPlaceholder', newPostComment[post._id])
-                        setNewPostComment({ ...newPostComment, [post._id]: "" })
-                      }
-                    }}
-                    disabled={!newPostComment[post._id]?.trim()}
-                    className={`comment-button p-2 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                      newPostComment[post._id]?.trim()
-                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    }`}
-                    aria-label="Send comment"
-                  >
-                    <Send size={16} />
-                  </button>
+                  <div className="comment-form flex items-center gap-2 p-1">
+                    <input
+                      type="text"
+                      value={newPostComment[post._id] || ""}
+                      onChange={(e) => setNewPostComment({ ...newPostComment, [post._id]: e.target.value })}
+                      placeholder={currentUser ? "Write a comment..." : "Please login to comment"}
+                      className="comment-input flex-1 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-300"
+                      disabled={!currentUser}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newPostComment[post._id]?.trim()) {
+                          handleCommentSubmit(post._id, newPostComment[post._id]);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => handleCommentSubmit(post._id, newPostComment[post._id])}
+                      disabled={!currentUser || !newPostComment[post._id]?.trim()}
+                      className={`comment-button p-2 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                        currentUser && newPostComment[post._id]?.trim()
+                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
+                      aria-label="Send comment"
+                    >
+                      <Send size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )
         })

@@ -115,26 +115,43 @@ export function useCommunityData() {
   }, []); // Empty dependency array means this runs once on mount
 
   // Add a comment to a post
-  const addPostComment = (postId, userId, content) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: [
-                ...post.comments,
-                {
-                  id: post.comments.length + 1,
-                  userId,
-                  content,
-                  timestamp: new Date().toISOString(), // e.g., "2025-05-17T01:36:00+05:30"
-                },
-              ],
-            }
-          : post
-      )
-    )
-  }
+  const addPostComment = async (postId, userId, content) => {
+    try {
+      // Get user info from localStorage
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userName = user?.fullName || 'Anonymous';
+
+      const response = await fetch(`${API_BASE_URL}/api/post/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: userName, // Send the user's full name instead of ID
+          userId: userId, // Keep the userId for reference
+          comment: content
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add comment');
+      }
+
+      const updatedPost = await response.json();
+      
+      // Update the posts state with the updated post
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === updatedPost._id ? updatedPost : post
+        )
+      );
+
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      // You might want to set an error state here to display a message in the UI
+    }
+  };
 
   // Toggle like on a post (Modified to call backend)
   const toggleLikePost = async (postId, userId) => {
