@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { X, Star, Clock } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +22,23 @@ export default function GameDashboard({
     const [currentView, setCurrentView] = useState("main")
     const [showDashboard, setShowDashboard] = useState(true)
     const navigate = useNavigate()
+    const [walletBalance, setWalletBalance] = useState(0);
+
+    useEffect(() => {
+        const storedBalance = localStorage.getItem('walletBalance');
+        console.log('Stored wallet balance from localStorage:', storedBalance);
+        if (storedBalance !== null) {
+            const balance = parseInt(storedBalance, 10);
+            if (!isNaN(balance)) {
+                setWalletBalance(balance);
+                console.log('Wallet balance set to:', balance);
+            } else {
+                console.log('Stored wallet balance is not a valid number.', storedBalance);
+            }
+        } else {
+            console.log('Wallet balance not found in localStorage.');
+        }
+    }, []);
 
     const handleClose = () => {
         console.log("Dashboard closed")
@@ -83,7 +100,7 @@ export default function GameDashboard({
                             {/* Header with Balance and Close Button */}
                             <div className="absolute top-4 right-4 flex items-center">
                                 <div className="mr-4 bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-white font-medium">
-                                    Balance: ₹1000
+                                    Balance: ₹{walletBalance}
                                 </div>
                                 <button
                                     className="text-white hover:text-red-500 transition rounded-full p-2 bg-gray-800/50"

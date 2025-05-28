@@ -16,12 +16,6 @@ export default function GameModeLayout({ title, children, onBack, gameMode = "Cl
           </button>
           <h1 className="text-lg font-medium">{title}</h1>
         </div>
-        <div className="flex items-center">
-          <div className="px-3 py-1 bg-transparent rounded-full flex items-center border border-purple-700/30">
-          {/* <div className="px-3 py-1 bg-[#1c0146] rounded-full flex items-center border border-purple-700/30"> */}
-            <span className="text-sm font-medium text-white">₹1240</span>
-          </div>
-        </div>
       </div>
       
       {/* Game logo */}
