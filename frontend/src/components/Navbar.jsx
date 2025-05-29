@@ -2,6 +2,7 @@ import React, { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon, Bell, Wallet, Gift, Trophy, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWallet } from '../context/WalletContext';
 
 const navigation = [];
 
@@ -14,8 +15,8 @@ const moreOptions = [
 
 export default function Navbar() {
   const [notifications, setNotifications] = useState(3);
-  const [walletBalance, setWalletBalance] = useState(2500);
   const navigate = useNavigate();
+  const { balance } = useWallet();
 
   const handleNotificationClick = () => {
     navigate('/notifications');
@@ -37,7 +38,7 @@ export default function Navbar() {
         className="flex items-center bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 text-white px-5 py-2 rounded-xl mx-2 shadow-lg border-2 border-yellow-200/60 cursor-pointer hover:shadow-xl transition-all duration-200"
       >
         <Wallet className="h-5 w-5 mr-2 text-white drop-shadow" />
-        <span className="font-bold text-lg drop-shadow">₹{walletBalance}</span>
+        <span className="font-bold text-lg drop-shadow">₹{balance}</span>
       </Link>
 
       {/* Nav Links (Desktop) */}

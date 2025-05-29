@@ -217,7 +217,7 @@ export default function FeaturedTournaments() {
                       {tournament.icon.startsWith('/') ? (
                         <img src={tournament.icon} alt={tournament.game} className="w-8 h-8 object-contain" />
                       ) : (
-                        <span className="text-2xl">{tournament.icon}</span>
+                      <span className="text-2xl">{tournament.icon}</span>
                       )}
                     </div>
                     <div>

@@ -17,10 +17,11 @@ const User = require('../models/User');
 // Get all users
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const users = await User.find().select('-password');
     res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 });
 

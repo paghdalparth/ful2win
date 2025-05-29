@@ -20,7 +20,7 @@ import SchedulerModal from "./modals/scheduler-modal"
 import CreateEventModal from "./modals/create-event-modal"
 import CreateAnnouncementModal from "./modals/create-annoucement-modals"
 import { X, PlusCircle } from "lucide-react"
-import { useCommunityData } from "./useCommunityData"
+import useCommunityData from "./useCommunityData"
 
 export default function CommunityPage() {
   const {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSection from "../components/HeroSection";
 import PopularGames from "../components/PopularGames";
 import GameStats from "../components/GameStats";
@@ -6,11 +6,15 @@ import SpinToWin from "../components/SpinToWin";
 import BottomNav from "../components/BottomNav";
 import { Wallet as WalletIcon, Bell } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { useWallet } from '../context/WalletContext';
+
 export default function HomePage() {
   const [showWallet, setShowWallet] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
- const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  const { balance } = useWallet();
 
   useEffect(() => {
     // Check if user is logged in (exists in localStorage)
@@ -50,7 +54,7 @@ export default function HomePage() {
               className="flex items-center gap-2 py-2 px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-purple-500/20 transition-all"
             >
               <WalletIcon className="h-4 w-4" />
-              ₹2500
+              ₹{balance}
             </button>
           </div>
         </div>

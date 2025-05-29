@@ -242,67 +242,67 @@ export default function PostsFeed({
               {/* Comments Section - Hidden by default */}
               {showComments[post._id] && (
                 <div className="comments-section mt-4">
-                  {post.comments && post.comments.length > 0 && (
-                    <div className="p-1 space-y-1">
-                      <h4 className="text-sm font-semibold text-blue-700">
-                        {post.comments.length} Comment{post.comments.length !== 1 && "s"}
-                      </h4>
-                      {post.comments.map((comment) => {
+                {post.comments && post.comments.length > 0 && (
+                  <div className="p-1 space-y-1">
+                    <h4 className="text-sm font-semibold text-blue-700">
+                      {post.comments.length} Comment{post.comments.length !== 1 && "s"}
+                    </h4>
+                    {post.comments.map((comment) => {
                         const commentAuthorName = getCommentAuthorName(comment);
                         const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
 
-                        return (
+                      return (
                           <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
-                            <img
+                          <img
                               src={commentAuthorAvatar}
                               alt={`${commentAuthorName}'s avatar`}
-                              className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
-                            />
-                            <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
-                              <div className="flex justify-between items-start">
-                                <h5
-                                  className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
-                                >
+                            className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
+                          />
+                          <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
+                            <div className="flex justify-between items-start">
+                              <h5
+                                className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
+                              >
                                   {commentAuthorName}
-                                </h5>
+                              </h5>
                                 <span className="text-xs text-gray-500">{formatDate(comment.date)}</span>
-                              </div>
-                              <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
                             </div>
+                              <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
 
-                  <div className="comment-form flex items-center gap-2 p-1">
-                    <input
-                      type="text"
+                <div className="comment-form flex items-center gap-2 p-1">
+                  <input
+                    type="text"
                       value={newPostComment[post._id] || ""}
                       onChange={(e) => setNewPostComment({ ...newPostComment, [post._id]: e.target.value })}
                       placeholder={currentUser ? "Write a comment..." : "Please login to comment"}
-                      className="comment-input flex-1 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-300"
+                    className="comment-input flex-1 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-300"
                       disabled={!currentUser}
-                      onKeyDown={(e) => {
+                    onKeyDown={(e) => {
                         if (e.key === "Enter" && newPostComment[post._id]?.trim()) {
                           handleCommentSubmit(post._id, newPostComment[post._id]);
-                        }
-                      }}
-                    />
-                    <button
+                      }
+                    }}
+                  />
+                  <button
                       onClick={() => handleCommentSubmit(post._id, newPostComment[post._id])}
                       disabled={!currentUser || !newPostComment[post._id]?.trim()}
-                      className={`comment-button p-2 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                    className={`comment-button p-2 rounded-full transition-colors duration-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
                         currentUser && newPostComment[post._id]?.trim()
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      }`}
-                      aria-label="Send comment"
-                    >
-                      <Send size={16} />
-                    </button>
-                  </div>
+                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    aria-label="Send comment"
+                  >
+                    <Send size={16} />
+                  </button>
                 </div>
+              </div>
               )}
             </div>
           )

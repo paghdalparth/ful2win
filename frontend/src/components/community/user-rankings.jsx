@@ -60,7 +60,7 @@ export default function UserRankings({ users, rankingType, handleProfileClick })
                   <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-white pulse"></div>
                 )}
               </div>
-              <span className="font-medium">{user.name}</span>
+              <span className="font-medium text-black">{user.name}</span>
             </div>
             <div className={styles.value}>
               {rankingType === "coins" ? user.coins.toLocaleString() : user.followers.toLocaleString()}

@@ -12,6 +12,7 @@ const Room = require('./models/Room');
 
 const ticTacToeGameRoutes = require('./routes/ticTacToeGame');
 const rockPaperGameRoutes = require('./routes/rockPaperGameRoutes');
+const userRoutes = require('./routes/userRoutes');
 const app = express();
 const server = http.createServer(app);
 
@@ -42,6 +43,7 @@ app.use('/api/games', gameRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/auth', authRoutes);
 
+app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
 
 app.use('/api/game', rockPaperGameRoutes);

@@ -21,7 +21,7 @@ export default function UserListSection({ users, startChat, toggleFollow, isFoll
               className="w-10 h-10 rounded-full border-2 border-transparent hover:border-indigo-300 transition-all duration-300"
             />
             <div>
-              <h3 className="font-medium">{user.name}</h3>
+              <h3 className="font-medium text-black">{user.name}</h3>
               <p className="text-sm text-gray-500">Followers: {user.followers}</p>
             </div>
           </div>

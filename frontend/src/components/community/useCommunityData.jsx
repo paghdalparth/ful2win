@@ -75,8 +75,8 @@ const initialGameOptions = [
 
 const API_BASE_URL = "http://localhost:5000"; // Hardcoded for now
 
-export function useCommunityData() {
-  const [users, setUsers] = useState(initialUsers)
+export default function useCommunityData() {
+  const [users, setUsers] = useState([]) // Initialize with empty array
   const [filteredUsers, setFilteredUsers] = useState(null) // For filtering users (e.g., by online status)
   const [posts, setPosts] = useState([]) // Initialize posts as an empty array
   const [playerStats] = useState(initialPlayerStats)
@@ -87,6 +87,40 @@ export function useCommunityData() {
   const [gameOptions] = useState(initialGameOptions)
   const [follows, setFollows] = useState({}) // e.g., { userId: [followedUserIds] }
   const [chats, setChats] = useState({}) // e.g., { userId: [{ senderId, message, timestamp }] }
+  const [notifications, setNotifications] = useState([]) // Add notifications state
+
+  // Fetch users from the backend
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+        const data = await response.json();
+        // Ensure data is an array before setting state
+        if (Array.isArray(data)) {
+          // Add a unique temporary ID if _id is not available, for frontend keying
+          const usersWithId = data.map(user => ({ 
+            ...user,
+            id: user._id || `temp-${Math.random()}`,
+            followers: 0, // Set followers to 0
+            name: user.fullName || user.name || 'Unknown User', // Use fullName as name, fallback to name or Unknown
+          }));
+          setUsers(usersWithId);
+        } else {
+          console.error("Fetched user data is not an array:", data);
+          setUsers([]); // Fallback to empty array
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setUsers([]); // Set to empty array on error
+        // You might want to set an error state here to display a message in the UI
+      }
+    };
+
+    fetchUsers();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Fetch posts from the backend
   useEffect(() => {
@@ -250,34 +284,59 @@ export function useCommunityData() {
   }
 
   // Toggle follow/unfollow
-  const toggleFollow = (followerId, followeeId) => {
+  const toggleFollow = (followeeId) => {
+    // Get current user from localStorage
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    if (!currentUser) {
+      console.error('No current user found');
+      return;
+    }
+    const followerId = currentUser._id;
+
     setFollows((prevFollows) => {
-      const followerList = prevFollows[followerId] || []
-      const isCurrentlyFollowing = followerList.includes(followeeId)
+      const followerList = prevFollows[followerId] || [];
+      const isCurrentlyFollowing = followerList.includes(followeeId);
       const updatedList = isCurrentlyFollowing
         ? followerList.filter((id) => id !== followeeId)
-        : [...followerList, followeeId]
+        : [...followerList, followeeId];
 
       // Update followers count for the followee
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === followeeId
-            ? { ...user, followers: isCurrentlyFollowing ? user.followers - 1 : user.followers + 1 }
+            ? { ...user, followers: isCurrentlyFollowing ? Math.max(0, user.followers - 1) : user.followers + 1 }
             : user
         )
-      )
+      );
+
+      // Add notification for follow/unfollow
+      if (!isCurrentlyFollowing) {
+        const followee = users.find(u => u.id === followeeId);
+        if (followee) {
+          addNotification({
+            type: "follow",
+            userId: followeeId,
+            content: `You started following ${followee.name}`,
+            timestamp: new Date().toISOString(),
+            read: true,
+          });
+        }
+      }
 
       return {
         ...prevFollows,
         [followerId]: updatedList,
-      }
-    })
-  }
+      };
+    });
+  };
 
   // Check if a user is following another user
-  const isFollowing = (followerId, followeeId) => {
-    return (follows[followerId] || []).includes(followeeId)
-  }
+  const isFollowing = (followeeId) => {
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+    if (!currentUser) return false;
+    const followerId = currentUser._id;
+    return (follows[followerId] || []).includes(followeeId);
+  };
 
   // Start a chat (initialize if not exists)
   const startChat = (userId) => {
@@ -339,6 +398,11 @@ export function useCommunityData() {
     return user ? user.xp : 0
   }
 
+  // Add notification function
+  const addNotification = (notification) => {
+    setNotifications(prev => [...prev, { ...notification, id: Date.now() }]);
+  };
+
   return {
     users,
     filteredUsers,
@@ -349,6 +413,7 @@ export function useCommunityData() {
     announcements,
     userBadges,
     gameOptions,
+    notifications, // Add notifications to the return object
     addPostComment,
     toggleLikePost,
     createPost,
@@ -360,7 +425,6 @@ export function useCommunityData() {
     formatDate,
     getUserLevel,
     getUserXP,
-    // Expose chats for use in ChatModal
     chats,
   }
 }

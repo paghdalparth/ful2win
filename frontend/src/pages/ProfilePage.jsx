@@ -32,6 +32,7 @@ import {
   ArrowRight
 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useWallet } from '../context/WalletContext';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -39,6 +40,8 @@ export default function ProfilePage() {
 const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [userData, setUserData] = useState(null);
+
+  const { balance } = useWallet();
 
   useEffect(() => {
     // Get user data from localStorage
@@ -106,7 +109,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
           <div className="min-w-[80px] bg-gray-800 border border-gray-700 rounded-xl p-2 text-center">
             <Coins className="h-5 w-5 mx-auto text-yellow-400 mb-1" />
             <p className="text-xs text-gray-300">Balance</p>
-            <p className="text-sm font-bold">₹2,450</p>
+            <p className="text-sm font-bold">₹{balance}</p>
           </div>
           
           <div className="min-w-[80px] bg-gray-800 border border-gray-700 rounded-xl p-2 text-center">
@@ -414,11 +417,11 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-700/50 rounded-lg p-3">
                     <p className="text-sm text-gray-400">Total Balance</p>
-                    <p className="text-xl font-bold">₹2,450</p>
+                    <p className="text-xl font-bold">₹{balance}</p>
                   </div>
                   <div className="bg-gray-700/50 rounded-lg p-3">
                     <p className="text-sm text-gray-400">Available to Withdraw</p>
-                    <p className="text-xl font-bold">₹2,450</p>
+                    <p className="text-xl font-bold">₹{balance}</p>
                   </div>
                 </div>
                 
