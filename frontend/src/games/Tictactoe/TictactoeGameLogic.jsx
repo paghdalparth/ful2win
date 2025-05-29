@@ -301,7 +301,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
             <button
               key={index}
               className={`
-                flex items-center justify-center 
+                flex items-center justify-center z-20
                 w-20 h-20 text-4xl font-bold rounded-md
                 ${cell ? 'cursor-default' : 'cursor-pointer'}
                 ${cell === null ? 'bg-white/20 hover:bg-white/10' : 
