@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Gamepad2, Users, Clock, Coins, IndianRupee, Trophy, Zap, Star, Crown, Target, ArrowRight, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -98,105 +98,82 @@ const games = [
 export default function PopularGames() {
   const [activeTab, setActiveTab] = useState('real');
   const [hoveredGame, setHoveredGame] = useState(null);
-  const canvasRef = useRef(null);
   const navigate = useNavigate();
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-    let particles = [];
-
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-
-    class Particle {
-      constructor() {
-        this.reset();
-      }
-
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = Math.random() * 1 - 0.5;
-        this.speedY = Math.random() * 1 - 0.5;
-        this.opacity = Math.random() * 0.3 + 0.1;
-        this.color = `hsl(${Math.random() * 60 + 200}, 70%, 50%)`;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        if (this.opacity > 0.1) this.opacity -= 0.001;
-        else this.reset();
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.opacity;
-        ctx.fill();
-      }
-    }
-
-    const initParticles = () => {
-      particles = Array.from({ length: 50 }, () => new Particle());
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((particle, i) => {
-        particle.update();
-        particle.draw();
-        particles.slice(i + 1).forEach(p2 => {
-          const dx = particle.x - p2.x;
-          const dy = particle.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(162, 89, 255, ${0.1 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        });
+    console.log("Component mounted, attempting to load video");
+    const video = videoRef.current;
+    
+    if (video) {
+      console.log("Video element found");
+      
+      // Add event listeners for debugging
+      video.addEventListener('loadeddata', () => {
+        console.log("Video data loaded");
       });
-      animationFrameId = requestAnimationFrame(animate);
-    };
 
-    resizeCanvas();
-    initParticles();
-    animate();
+      video.addEventListener('error', (e) => {
+        console.error("Video error:", e);
+      });
 
-    window.addEventListener('resize', resizeCanvas);
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrameId);
-    };
+      video.addEventListener('playing', () => {
+        console.log("Video started playing");
+      });
+
+      // Try to play the video
+      video.play()
+        .then(() => {
+          console.log("Video playback started successfully");
+        })
+        .catch((error) => {
+          console.error("Video playback failed:", error);
+        });
+    } else {
+      console.log("Video element not found");
+    }
   }, []);
 
   return (
-    <section className="relative py-12 px-4 overflow-hidden bg-gradient-to-b from-[#121b2f] to-[#1e0b43]">
-      {/* Interactive Background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0.2 }}
-      />
-      
-      {/* Simplified Background Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />
-
-      {/* Simplified Grid Pattern */}
+    <section className="relative py-12 px-4 overflow-hidden min-h-screen bg-gradient-to-b from-[#121b2f] to-[#1e0b43]">
+      {/* Video Background */}
       <div 
-        className="absolute inset-0 opacity-[0.03]"
+        className="fixed top-0 left-0 w-full h-full z-0"
+        style={{ pointerEvents: 'none' }}
+      >
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: 0.7
+          }}
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source 
+            src="/bgvideo.mp4" 
+            type="video/mp4"
+            onError={(e) => console.error("Source error:", e)}
+          />
+        </video>
+      </div>
+
+      {/* Dark Overlay */}
+      <div 
+        className="fixed inset-0 bg-gradient-to-b from-[#121b2f]/80 to-[#1e0b43]/80 z-[1]"
+      />
+
+      {/* Grid Pattern */}
+      <div 
+        className="fixed inset-0 opacity-[0.05] z-[2]"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
@@ -206,6 +183,7 @@ export default function PopularGames() {
         }}
       />
 
+      {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-10">
@@ -239,8 +217,6 @@ export default function PopularGames() {
     </button>
   ))}
 </div>
-
-
 
         {/* Games Grid */}
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -406,9 +382,14 @@ export default function PopularGames() {
       </div>
 
       <style>{`
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .animate-gradient {
+          animation: gradient 15s ease infinite;
         }
         
         @media (max-width: 480px) {

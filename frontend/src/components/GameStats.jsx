@@ -116,7 +116,6 @@ const activeMatches = [
 ];
 
 export default function GameStats() {
-  const canvasRef = useRef(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({
     totalPlayers: 0,
@@ -124,86 +123,23 @@ export default function GameStats() {
     totalPrizePool: 0,
     dailyWinners: 0,
   });
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-    let particles = [];
+    const video = videoRef.current;
+    if (!video) return;
 
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+    const loadVideo = async () => {
+      try {
+        await video.load();
+        await video.play();
+        console.log("Video started playing");
+      } catch (error) {
+        console.error("Video error:", error);
+      }
     };
 
-    class Particle {
-      constructor() {
-        this.reset();
-      }
-
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 1;
-        this.speedX = Math.random() * 2 - 1;
-        this.speedY = Math.random() * 2 - 1;
-        this.opacity = Math.random() * 0.5 + 0.2;
-        this.color = `hsl(${Math.random() * 60 + 200}, 70%, 50%)`;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        if (this.opacity > 0.1) this.opacity -= 0.001;
-        else this.reset();
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.opacity;
-        ctx.fill();
-      }
-    }
-
-    const initParticles = () => {
-      particles = Array.from({ length: 100 }, () => new Particle());
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((particle, i) => {
-        particle.update();
-        particle.draw();
-        particles.slice(i + 1).forEach(p2 => {
-          const dx = particle.x - p2.x;
-          const dy = particle.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(162, 89, 255, ${0.1 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-          }
-        });
-      });
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    resizeCanvas();
-    initParticles();
-    animate();
-
-    window.addEventListener('resize', resizeCanvas);
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationFrameId);
-    };
+    loadVideo();
   }, []);
 
   useEffect(() => {
@@ -227,31 +163,24 @@ export default function GameStats() {
   };
 
   return (
-    <section className="relative py-16 overflow-hidden bg-[#0a0a1a]">
-      {/* Interactive Canvas Background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0.6 }}
-      />
-      
-      {/* Dynamic Gradient Overlay */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(circle at 20% 20%, rgba(162, 89, 255, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(58, 242, 255, 0.12) 0%, transparent 50%),
-            linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)
-          `,
-          backgroundBlendMode: 'screen',
-          animation: 'gradientShift 15s ease infinite'
-        }}
-      />
-
-      {/* Animated Glow Effects */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-float-slow" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-float-slow-delayed" />
+    <section className="relative py-16 overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source 
+            src="bgvideo3.mp4" 
+            type="video/mp4"
+          />
+        </video>
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -462,30 +391,6 @@ export default function GameStats() {
       </div>
 
       <style>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 0%; }
-          50% { background-position: 100% 100%; }
-          100% { background-position: 0% 0%; }
-        }
-
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-20px) scale(1.05); }
-        }
-
-        @keyframes float-slow-delayed {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-20px) scale(1.05); }
-        }
-
-        .animate-float-slow {
-          animation: float-slow 8s ease-in-out infinite;
-        }
-
-        .animate-float-slow-delayed {
-          animation: float-slow-delayed 8s ease-in-out infinite 2s;
-        }
-
         .group:hover .absolute {
           transform: scale(1.02);
           transition: transform 0.3s ease;

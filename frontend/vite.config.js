@@ -5,5 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173
-  }
+  },
+  assetsInclude: ['**/*.mp4'],
+  publicDir: 'public'
 });

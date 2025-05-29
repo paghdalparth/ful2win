@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Users, IndianRupee, Clock, Trophy, Flame, ArrowRight, Target, Crown, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -138,7 +138,25 @@ function CountdownTimer({ date, endDate }) {
 export default function FeaturedTournaments() {
   const [currentTime] = useState(new Date());
   const navigate = useNavigate();
+  const videoRef = useRef(null);
   
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const loadVideo = async () => {
+      try {
+        await video.load();
+        await video.play();
+        console.log("Video started playing");
+      } catch (error) {
+        console.error("Video error:", error);
+      }
+    };
+
+    loadVideo();
+  }, []);
+
   // For demo purposes, set one past tournament
   const pastTournament = {
     ...tournaments[0], 
@@ -154,39 +172,26 @@ export default function FeaturedTournaments() {
   ];
 
   return (
-    <section className="relative py-12 px-4 overflow-hidden bg-gradient-to-b from-[#121b2f] to-[#1e0b43]">
-      {/* Simplified background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />
-
-      {/* Simplified grid pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px'
-        }}
-      />
-
-      {/* Animated Particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1.5 h-1.5 rounded-full animate-float"
-            style={{
-              background: i % 2 === 0 ? 'rgba(139, 92, 246, 0.5)' : 'rgba(59, 130, 246, 0.5)',
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`,
-            }}
+    <section className="relative py-12 px-4 overflow-hidden min-h-screen">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source 
+            src="bgvideo2.mp4" 
+            type="video/mp4"
           />
-        ))}
+        </video>
       </div>
 
+      {/* Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-10">
