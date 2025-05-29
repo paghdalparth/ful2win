@@ -22,6 +22,25 @@ export default function SpinToWin() {
   const [remainingSpins, setRemainingSpins] = useState(DAILY_SPIN_LIMIT); // Starting with 5 spins left
   const [lastSpinDate, setLastSpinDate] = useState(null);
   const wheelRef = useRef(null);
+  const videoRef = useRef(null);
+
+  // Add video loading effect
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const loadVideo = async () => {
+      try {
+        await video.load();
+        await video.play();
+        console.log("Video started playing");
+      } catch (error) {
+        console.error("Video error:", error);
+      }
+    };
+
+    loadVideo();
+  }, []);
 
   // Reset CSS variables for wheel animation
   useEffect(() => {
@@ -129,22 +148,27 @@ export default function SpinToWin() {
   };
 
   return (
-    <section className="relative min-h-screen py-8 overflow-hidden bg-[#0F1729]">
-      {/* Dark Background with Particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1.5 h-1.5 rounded-full bg-yellow-300/20 animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 5}s`
-            }}
+    <section className="relative min-h-screen py-8 overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source 
+            src="bgvideo4.mp4" 
+            type="video/mp4"
           />
-        ))}
+        </video>
       </div>
+
+      {/* Dark overlay for better content visibility */}
+      <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 max-w-md mx-auto px-4 w-full">
         {/* Header with larger Jackpot Spin */}
