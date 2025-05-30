@@ -73,7 +73,9 @@ const initialGameOptions = [
   { id: 5, name: "Shooter" },
 ]
 
-const API_BASE_URL = "http://localhost:5000"; // Hardcoded for now
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? "https://ful2win-backend.onrender.com"
+  : "http://localhost:5000"; // Use production URL in production, local in development
 
 export default function useCommunityData() {
   const [users, setUsers] = useState([]) // Initialize with empty array
@@ -88,6 +90,13 @@ export default function useCommunityData() {
   const [follows, setFollows] = useState({}) // e.g., { userId: [followedUserIds] }
   const [chats, setChats] = useState({}) // e.g., { userId: [{ senderId, message, timestamp }] }
   const [notifications, setNotifications] = useState([]) // Add notifications state
+  const [currentUser, setCurrentUser] = useState(null) // Add currentUser state
+
+  // Initialize currentUser from localStorage
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setCurrentUser(user);
+  }, []);
 
   // Fetch users from the backend
   useEffect(() => {
@@ -104,10 +113,14 @@ export default function useCommunityData() {
           const usersWithId = data.map(user => ({ 
             ...user,
             id: user._id || `temp-${Math.random()}`,
-            followers: 0, // Set followers to 0
             name: user.fullName || user.name || 'Unknown User', // Use fullName as name, fallback to name or Unknown
+            coins: user.Balance || 0, // Map Balance to coins for rankings
+            followers: user.followers || [], // Ensure followers is an array
+            following: user.following || [], // Ensure following is an array
           }));
-          setUsers(usersWithId);
+          // Sort users by balance (coins) in descending order
+          const sortedUsers = usersWithId.sort((a, b) => b.coins - a.coins);
+          setUsers(sortedUsers);
         } else {
           console.error("Fetched user data is not an array:", data);
           setUsers([]); // Fallback to empty array
@@ -284,7 +297,7 @@ export default function useCommunityData() {
   }
 
   // Toggle follow/unfollow
-  const toggleFollow = (followeeId) => {
+  const toggleFollow = async (followeeId) => {
     // Get current user from localStorage
     const currentUser = JSON.parse(localStorage.getItem('user'));
     if (!currentUser) {
@@ -293,77 +306,204 @@ export default function useCommunityData() {
     }
     const followerId = currentUser._id;
 
-    setFollows((prevFollows) => {
-      const followerList = prevFollows[followerId] || [];
-      const isCurrentlyFollowing = followerList.includes(followeeId);
-      const updatedList = isCurrentlyFollowing
-        ? followerList.filter((id) => id !== followeeId)
-        : [...followerList, followeeId];
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/follow/${followeeId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ followerId }),
+      });
 
-      // Update followers count for the followee
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to toggle follow status');
+      }
+
+      const data = await response.json();
+      console.log('Follow status updated:', data);
+
+      // Update local state with the new follow status
+      setFollows((prevFollows) => {
+        const followerList = prevFollows[followerId] || [];
+        const isCurrentlyFollowing = followerList.includes(followeeId);
+        const updatedList = isCurrentlyFollowing
+          ? followerList.filter((id) => id !== followeeId)
+          : [...followerList, followeeId];
+
+        return {
+          ...prevFollows,
+          [followerId]: updatedList,
+        };
+      });
+
+      // Update users state with new follower counts
       setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === followeeId
-            ? { ...user, followers: isCurrentlyFollowing ? Math.max(0, user.followers - 1) : user.followers + 1 }
-            : user
-        )
+        prevUsers.map((user) => {
+          if (user._id === followeeId) {
+            return {
+              ...user,
+              followers: data.followee.followers.length,
+            };
+          }
+          if (user._id === followerId) {
+            return {
+              ...user,
+              following: data.follower.following.length,
+            };
+          }
+          return user;
+        })
       );
 
-      // Add notification for follow/unfollow
-      if (!isCurrentlyFollowing) {
-        const followee = users.find(u => u.id === followeeId);
+      // Add notification for follow
+      if (!data.follower.following.includes(followeeId)) {
+        const followee = users.find(u => u._id === followeeId);
         if (followee) {
           addNotification({
             type: "follow",
             userId: followeeId,
-            content: `You started following ${followee.name}`,
+            content: `You started following ${followee.fullName || followee.name}`,
             timestamp: new Date().toISOString(),
             read: true,
           });
         }
       }
 
-      return {
-        ...prevFollows,
-        [followerId]: updatedList,
-      };
-    });
+    } catch (error) {
+      console.error('Error toggling follow status:', error);
+      // You might want to set an error state here to display a message in the UI
+    }
   };
 
   // Check if a user is following another user
-  const isFollowing = (followeeId) => {
+  const isFollowing = async (followeeId) => {
+    // Get current user from localStorage
     const currentUser = JSON.parse(localStorage.getItem('user'));
-    if (!currentUser) return false;
+    if (!currentUser) {
+      return false;
+    }
     const followerId = currentUser._id;
-    return (follows[followerId] || []).includes(followeeId);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/follow-status/${followeeId}?followerId=${followerId}`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get follow status');
+      }
+
+      const { isFollowing } = await response.json();
+      return isFollowing;
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+      return false;
+    }
   };
 
   // Start a chat (initialize if not exists)
-  const startChat = (userId) => {
-    if (!chats[userId]) {
-      setChats((prevChats) => ({
+  const startChat = async (userId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to start chat');
+      }
+
+      const chat = await response.json();
+      setChats(prevChats => ({
         ...prevChats,
-        [userId]: [],
-      }))
+        [userId]: chat.messages
+      }));
+
+      // Mark messages as read
+      await fetch(`${API_BASE_URL}/api/chat/${userId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      return userId;
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      alert(error.message || 'Failed to start chat');
+      throw error;
     }
-    return userId // Return the userId for the chat
-  }
+  };
 
   // Send a chat message
-  const sendChatMessage = (userId, message) => {
-    setChats((prevChats) => ({
-      ...prevChats,
-      [userId]: [
-        ...(prevChats[userId] || []),
-        {
-          senderId: 1, // Default to user 1 (Alex) for demo
-          message,
-          timestamp: new Date().toISOString(),
+  const sendChatMessage = async (userId, message) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/${userId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-      ],
-    }))
-    return Promise.resolve() // Simulate async operation
-  }
+        body: JSON.stringify({ content: message })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send message');
+      }
+
+      const chat = await response.json();
+      setChats(prevChats => ({
+        ...prevChats,
+        [userId]: chat.messages
+      }));
+
+      return chat;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert(error.message || 'Failed to send message');
+      throw error;
+    }
+  };
+
+  // Load all chats for current user
+  const loadChats = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to load chats');
+      }
+
+      const chats = await response.json();
+      const chatMap = {};
+      chats.forEach(chat => {
+        const otherParticipant = chat.participants.find(p => p._id !== currentUser._id);
+        if (otherParticipant) {
+          chatMap[otherParticipant._id] = chat.messages;
+        }
+      });
+      setChats(chatMap);
+    } catch (error) {
+      console.error('Error loading chats:', error);
+    }
+  };
+
+  // Load chats when component mounts
+  useEffect(() => {
+    if (currentUser) {
+      loadChats();
+    }
+  }, [currentUser]);
 
   // Format a date relative to the current date (01:36 PM IST, May 17, 2025)
   const formatDate = (dateString) => {
@@ -413,7 +553,8 @@ export default function useCommunityData() {
     announcements,
     userBadges,
     gameOptions,
-    notifications, // Add notifications to the return object
+    notifications,
+    currentUser,
     addPostComment,
     toggleLikePost,
     createPost,

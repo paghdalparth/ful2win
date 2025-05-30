@@ -21,8 +21,18 @@ const userSchema = new mongoose.Schema({
   },
   Balance: {
     type: Number,
-    default:"0"
-  }
+    default: 0
+  },
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }],
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }]
 });
 
 // Hash password before saving
