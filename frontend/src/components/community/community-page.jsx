@@ -68,7 +68,7 @@ export default function CommunityPage() {
   const [pollData, setPollData] = useState({ question: "", options: ["", ""], allowMultipleVotes: false })
 
   const currentUser = users.find((u) => u.isCurrentUser || u.id === 1)
-  const currentUserId = currentUser?.id
+  const currentUserId = currentUser?._id
 
   // Toggle create post visibility
   const toggleCreatePostVisibility = () => {
@@ -112,6 +112,17 @@ export default function CommunityPage() {
   // Close profile modal
   const closeProfileModal = () => {
     setViewingProfile(null)
+  }
+
+  // Handle starting a chat from the user list
+  const handleStartChatFromList = async (userId) => {
+    try {
+      const chatId = await startChat(userId)
+      setActiveChatUser(chatId)
+    } catch (error) {
+      console.error("Error starting chat from list:", error)
+      alert("Failed to start chat. Please try again.")
+    }
   }
 
   // Close chat
@@ -452,7 +463,14 @@ export default function CommunityPage() {
 
         {activeSection === "achievements" && <AchievementsSection achievements={achievements} />}
 
-        {activeSection === "messages" && <MessagesSection users={users} startChat={startChat} />}
+        {activeSection === "messages" && (
+          <MessagesSection 
+            users={users} 
+            startChat={handleStartChatFromList}
+            chats={chats}
+            formatDate={formatDate}
+          />
+        )}
 
         {activeSection === "settings" && <SettingsSection />}
 
@@ -464,9 +482,10 @@ export default function CommunityPage() {
         {showUserList && (
           <UserListSection
             users={filteredUsers || users}
-            startChat={startChat}
+            startChat={handleStartChatFromList}
             toggleFollow={toggleFollow}
             isFollowing={isFollowing}
+            handleProfileClick={handleProfileClick}
           />
         )}
 

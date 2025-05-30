@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const protected = require('./routes/protected');
 const MatchmakingQueue = require('./models/MatchmakingQueue');
 const Room = require('./models/Room');
+const chatRoutes = require('./routes/chat');
 
 const ticTacToeGameRoutes = require('./routes/ticTacToeGame');
 const rockPaperGameRoutes = require('./routes/rockPaperGameRoutes');
@@ -42,12 +43,10 @@ require('./config/db')();
 app.use('/api/games', gameRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/auth', authRoutes);
-
+app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
-
 app.use('/api/game', rockPaperGameRoutes);
-// app.use('/api/protected', require('./routes/protected')); // secured routes
 app.use('/api/protected', protected); // secured routes
 
 // Socket.IO Connection

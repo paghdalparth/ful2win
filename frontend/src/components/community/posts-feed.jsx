@@ -17,12 +17,36 @@ export default function PostsFeed({
   const [newPostComment, setNewPostComment] = useState({})
   const [showComments, setShowComments] = useState({}) // Comments hidden by default
   const [currentUser, setCurrentUser] = useState(null)
+  const [followingStatus, setFollowingStatus] = useState({}) // Store following status for each user
 
   // Get current user from localStorage on component mount
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     setCurrentUser(user);
   }, []);
+
+  // Update following status when users or isFollowing changes
+  useEffect(() => {
+    const updateFollowingStatus = async () => {
+      if (!currentUser) return;
+      
+      const statuses = {};
+      for (const user of users) {
+        if (user._id && user._id !== currentUser._id) {
+          try {
+            const isUserFollowing = await isFollowing(user._id);
+            statuses[user._id] = isUserFollowing;
+          } catch (error) {
+            console.error('Error checking follow status for user:', user._id, error);
+            statuses[user._id] = false;
+          }
+        }
+      }
+      setFollowingStatus(statuses);
+    };
+
+    updateFollowingStatus();
+  }, [users, currentUser, isFollowing]);
 
   // Toggle comments visibility for a specific post
   const toggleComments = (postId) => {
@@ -89,6 +113,11 @@ export default function PostsFeed({
         posts.map((post) => {
           const authorName = post.author || "Unknown User"
           const authorAvatar = "/images/avatars/default-avatar.jpg"
+          // Find the user object that matches the author name
+          const authorUser = users.find(user => user.name === authorName || user.fullName === authorName)
+          const authorId = authorUser?.id || authorUser?._id
+          // Get following status from state
+          const isUserFollowing = authorId ? followingStatus[authorId] || false : false
 
           return (
             <div
@@ -101,25 +130,31 @@ export default function PostsFeed({
                   src={authorAvatar}
                   alt={`${authorName}'s avatar`}
                   className="post-avatar w-10 h-10 sm:w-12 sm:h-12 rounded-full cursor-pointer transition-transform duration-300 hover:scale-105 object-cover"
+                  onClick={() => authorId && handleProfileClick(authorId)}
                 />
                 <div className="flex flex-row gap-10">
                   <div className="flex items-center gap-8">
                     <h3
-                      className="post-author text-sm sm:text-base font-semibold text-gray-900 leading-tight hover:text-blue-600 transition-colors duration-300"
+                      className="post-author text-sm sm:text-base font-semibold text-gray-900 leading-tight hover:text-blue-600 cursor-pointer transition-colors duration-300"
+                      onClick={() => authorId && handleProfileClick(authorId)}
                     >
                       {authorName}
                     </h3>
                     <p className="post-time text-sm text-gray-500">{formatDate(post.createdAt)}</p>
                   </div>
-                  {toggleFollow && (
+                  {toggleFollow && authorId && authorId !== currentUser?._id && (
                     <button
-                      onClick={() => console.log('Follow button clicked for author:', authorName)}
-                      className={`self-start flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-xs font-medium text-white transition-all duration-300 focus:ring-1 focus:ring-blue-600 focus:ring-offset-1 hover:scale-105 transform bg-blue-600 hover:bg-blue-700`}
-                      aria-label={`Follow ${authorName}`}
-                      aria-pressed={false}
+                      onClick={() => toggleFollow(authorId)}
+                      className={`self-start flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-xs font-medium text-white transition-all duration-300 focus:ring-1 focus:ring-blue-600 focus:ring-offset-1 hover:scale-105 transform ${
+                        isUserFollowing
+                          ? "bg-gray-400 hover:bg-gray-500"
+                          : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                      }`}
+                      aria-label={isUserFollowing ? "Unfollow user" : "Follow user"}
+                      aria-pressed={isUserFollowing}
                     >
                       <UserPlus size={12} />
-                      <span>Follow</span>
+                      <span>{isUserFollowing ? "Unfollow" : "Follow"}</span>
                     </button>
                   )}
                 </div>
@@ -250,18 +285,23 @@ export default function PostsFeed({
                     {post.comments.map((comment) => {
                         const commentAuthorName = getCommentAuthorName(comment);
                         const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
+                        // Find the user object that matches the comment author name
+                        const commentAuthorUser = users.find(user => user.name === commentAuthorName || user.fullName === commentAuthorName)
+                        const commentAuthorId = commentAuthorUser?.id || commentAuthorUser?._id
 
                       return (
                           <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">
                           <img
                               src={commentAuthorAvatar}
                               alt={`${commentAuthorName}'s avatar`}
-                            className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
+                              className="w-8 h-8 rounded-md cursor-pointer transition-transform duration-300 hover:scale-110 object-cover"
+                              onClick={() => commentAuthorId && handleProfileClick(commentAuthorId)}
                           />
                           <div className="flex-1 p-1 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg  hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 transition-colors duration-300">
                             <div className="flex justify-between items-start">
                               <h5
                                 className="text-sm font-semibold text-blue-700 hover:text-blue-900 cursor-pointer transition-colors duration-300"
+                                onClick={() => commentAuthorId && handleProfileClick(commentAuthorId)}
                               >
                                   {commentAuthorName}
                               </h5>
