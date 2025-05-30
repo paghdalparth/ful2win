@@ -46,18 +46,20 @@ export default function RockPaperScissors() {
   const [isPlayerTurn, setIsPlayerTurn] = useState(false)
   const timerRef = useRef(null)
   const [isGameInitialized, setIsGameInitialized] = useState(false)
-const [gameWinner, setGameWinner] = useState(null);
-const [player1Score, setPlayer1Score] = useState(0);
-const [player2Score, setPlayer2Score] = useState(0);
-const [use, setUse]=useState("0")
+  const [gameWinner, setGameWinner] = useState(null);
+  const [player1Score, setPlayer1Score] = useState(0);
+  const [player2Score, setPlayer2Score] = useState(0);
+  const [use, setUse]=useState("0")
   // Add debounce refs
   const lastUpdateRef = useRef(null)
   const updateTimeoutRef = useRef(null)
   const [isProcessingUpdate, setIsProcessingUpdate] = useState(false)
 
-
   const [game, setGame] = useState(null);
   const [roundResults, setRoundResults] = useState([]);
+  // Add new state for current player turn
+  const [currentPlayerTurn, setCurrentPlayerTurn] = useState(null);
+
   // Timer effect
   useEffect(() => {
     if (isPlayerTurn && timeLeft > 0 && !gameOver) {
@@ -139,84 +141,84 @@ const [use, setUse]=useState("0")
     }
   }, [roomId, userId, playerId1, playerId2, isGameInitialized])
 
-  // Socket event handler for round updates
-  const handleRoundUpdate = useCallback((game) => {
-    if (isProcessingUpdate) return
+  // Add effect to check current player turn
+  useEffect(() => {
+    const checkCurrentTurn = async () => {
+      if (!gameId) return;
+      
+      try {
+        const response = await axios.get(`https://ful2win-backend.onrender.com/api/game/current-turn/${gameId}`);
+        const { currentPlayerTurn } = response.data;
+        setCurrentPlayerTurn(currentPlayerTurn);
+        
+        // Update isPlayerTurn based on currentPlayerTurn from database
+        if (isPlayer1) {
+          setIsPlayerTurn(currentPlayerTurn === 'player1');
+        } else {
+          setIsPlayerTurn(currentPlayerTurn === 'player2');
+        }
+      } catch (error) {
+        console.error('Error checking current turn:', error);
+      }
+    };
 
-    const now = Date.now()
+    // Check turn initially and set up interval
+    checkCurrentTurn();
+    const interval = setInterval(checkCurrentTurn, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameId, isPlayer1]);
+
+  // Update handleRoundUpdate to handle currentPlayerTurn
+  const handleRoundUpdate = useCallback((game) => {
+    if (isProcessingUpdate) return;
+
+    const now = Date.now();
     if (lastUpdateRef.current && now - lastUpdateRef.current < 1000) {
-      return
+      return;
     }
 
-    lastUpdateRef.current = now
-    setIsProcessingUpdate(true)
+    lastUpdateRef.current = now;
+    setIsProcessingUpdate(true);
 
     try {
-      const currentRound = game.rounds.find(r => r.roundNumber === game.currentRound)
-      if (!currentRound) return
+      const currentRound = game.rounds.find(r => r.roundNumber === game.currentRound);
+      if (!currentRound) return;
 
-      setPlayer1Choice(currentRound.player1Move)
-      setPlayer2Choice(currentRound.player2Move)
+      setPlayer1Choice(currentRound.player1Move);
+      setPlayer2Choice(currentRound.player2Move);
+      setCurrentPlayerTurn(game.currentPlayerTurn);
 
       // Update scores
       setScores({
         player1: game.player1Score,
         player2: game.player2Score
-      })
+      });
 
       // Update round number
-      setRoundNumber(game.currentRound)
+      setRoundNumber(game.currentRound);
 
-      // Check if it's player's turn
-      if (!currentRound.player1Move && isPlayer1) {
-        setIsPlayerTurn(true)
-        setTimeLeft(10)
-      } else if (!currentRound.player2Move && !isPlayer1) {
-        setIsPlayerTurn(true)
-        setTimeLeft(10)
+      // Check if it's player's turn based on currentPlayerTurn
+      if (isPlayer1) {
+        setIsPlayerTurn(game.currentPlayerTurn === 'player1');
+      } else {
+        setIsPlayerTurn(game.currentPlayerTurn === 'player2');
       }
 
       // Check if round is complete
       if (currentRound.status === 'completed') {
-        evaluateRound(currentRound.player1Move, currentRound.player2Move)
+        evaluateRound(currentRound.player1Move, currentRound.player2Move);
       }
 
       // Check if game is over
       if (game.status === 'finished') {
-        setGameOver(true)
-        // Get prize amount and wallet balance from localStorage
-// Sample variables (you can replace these with real values)
-// let game = { winner: "user123" };
-// let userId = "user123"; // Current user ID
-
-// Check if current user is the winner
-console.log("userid"+userId)
-console.log("game"+game.winner)
-if (game.winner === userId) {
-    // Get prize and wallet balance
-    let prizeAmount = parseInt(localStorage.getItem('prizeAmount') || '0', 10);
-    let walletBalance = parseInt(localStorage.getItem('walletBalance') || '0', 10);
-
-    // Add prize to wallet
-    let updatedBalance = walletBalance + prizeAmount;
-    localStorage.setItem('walletBalance', updatedBalance.toString());
-
-    // Optionally clear prizeAmount
-    localStorage.setItem('prizeAmount', '0');
-
-    console.log("🏆 You won! New Wallet Balance: ₹" + updatedBalance);
-} else {
-    console.log("You lost. Better luck next time.");
-}
-
-
-
-        setWinner(game.winner === userId ? "player1" : "player2")
+        setGameOver(true);
+        setWinner(game.winner === userId ? "player1" : "player2");
       }
     } finally {
-      setIsProcessingUpdate(false)
+      setIsProcessingUpdate(false);
     }
-  }, [isPlayer1, userId])
+  }, [isPlayer1, userId]);
 
   // Socket event listeners
   useEffect(() => {
@@ -239,7 +241,6 @@ if (game.winner === userId) {
       socket.off('roundUpdated', handleRoundUpdate)
     }
   }, [roomId, userId, isPlayer1, isGameInitialized, gameId, handleRoundUpdate])
-
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -285,51 +286,50 @@ useEffect(() => {
   }
 }, [roundNumber, gameOver]);
 
-
-
+  // Update handleChoice to check current turn
   const handleChoice = async (choice) => {
     if (!gameId || !isPlayerTurn || isProcessingUpdate) {
-      console.log('Cannot make move:', { gameId, isPlayerTurn, isProcessingUpdate })
-      return
+      console.log('Cannot make move:', { gameId, isPlayerTurn, isProcessingUpdate });
+      return;
     }
 
     try {
-      setIsProcessingUpdate(true)
+      setIsProcessingUpdate(true);
 
       // Send move update
       const response = await axios.put(`https://ful2win-backend.onrender.com/api/game/move/${gameId}`, {
         playerId: userId,
         move: choice,
         roundNumber: roundNumber
-      })
+      });
 
       // Update local state
       if (isPlayer1) {
-        setPlayer1Choice(choice)
+        setPlayer1Choice(choice);
       } else {
-        setPlayer2Choice(choice)
+        setPlayer2Choice(choice);
       }
 
-      setIsPlayerTurn(false)
-      clearInterval(timerRef.current)
+      setIsPlayerTurn(false);
+      clearInterval(timerRef.current);
 
-      console.log('Move updated successfully:', response.data)
+      console.log('Move updated successfully:', response.data);
 
       // Check if both players have made their moves
-      const updatedGame = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`)
-      const currentRound = updatedGame.data.rounds.find(r => r.roundNumber === roundNumber)
+      const updatedGame = await axios.get(`https://ful2win-backend.onrender.com/api/game/room/${roomId}`);
+      const currentRound = updatedGame.data.rounds.find(r => r.roundNumber === roundNumber);
       
       if (currentRound && currentRound.player1Move && currentRound.player2Move) {
         // Both players have moved, evaluate the round
-        evaluateRound(currentRound.player1Move, currentRound.player2Move)
+        evaluateRound(currentRound.player1Move, currentRound.player2Move);
       }
 
     } catch (error) {
-      console.error('Error updating move:', error)
+      console.error('Error updating move:', error);
     } finally {
-      setIsProcessingUpdate(false)
+      setIsProcessingUpdate(false);
     }
-  }
+  };
 
   // Determine winner of the round
   const evaluateRound = async (p1Choice, p2Choice) => {
@@ -479,11 +479,12 @@ if (data.player1Score > data.player2Score) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-slate-900 to-slate-800">
-      <h1 className="text-3xl font-bold text-white mb-6">Rock Paper Scissors</h1>
+    <div style={{ backgroundImage: "url('/stonepaper.jpg')" }} className="h-full bg-cover bg-center flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-slate-900 to-slate-800">
+      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      <h1 className="text-3xl font-bold text-white mb-6 relative z-20">Rock Paper Scissors</h1>
 
       {/* Game info */}
-      <div className="bg-white/10 rounded-lg px-6 py-3 mb-6 w-full max-w-md">
+      <div className="bg-white/10 rounded-lg px-6 py-3 mb-6 w-full max-w-md relative z-20">
         <div className="flex justify-between items-center">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-400">{scores.player1}</div>
@@ -506,7 +507,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Timer */}
       {!gameOver && (
-        <div className="mb-4 text-center">
+        <div className="mb-4 text-center relative z-20">
           <div className="text-xl font-bold text-white mb-2">
             {isPlayerTurn ? `Your Turn - ${timeLeft}s` : "Opponent's Turn"}
           </div>
@@ -515,7 +516,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Current player indicator */}
       {!gameOver && !roundResult && (
-        <div className="mb-4 text-center">
+        <div className="mb-4 text-center relative z-20">
           <div className="text-xl font-bold text-white mb-2">
             {isPlayerTurn ? "Your Turn" : "Waiting for opponent..."}
           </div>
@@ -525,7 +526,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Choices display */}
       {roundResult && (
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-6">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-6 relative z-20">
           <div
             className={`w-40 bg-white rounded-lg p-6 ${roundResult === "player1" ? "border-2 border-green-500" : ""}`}
           >
@@ -556,7 +557,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Round result message */}
       {roundResult && !gameOver && (
-        <div className="mb-6 text-center">
+        <div className="mb-6 text-center relative z-20">
           <div
             className={`text-xl font-bold ${
               roundResult === "draw" ? "text-yellow-400" : roundResult === "player1" ? "text-blue-400" : "text-red-400"
@@ -569,7 +570,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Game over message */}
       {gameOver && (
-        <div className="mb-6 text-center">
+        <div className="mb-6 text-center relative z-20">
           <div
             className={`text-2xl font-bold mb-2 ${
               winner === "draw" ? "text-yellow-400" : winner === "player1" ? "text-blue-400" : "text-red-400"
@@ -585,7 +586,7 @@ if (data.player1Score > data.player2Score) {
 
       {/* Choice buttons */}
       {!gameOver && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6 relative z-20">
           {Object.values(CHOICES).map((choice) => (
             <button
               key={choice}
@@ -601,18 +602,18 @@ if (data.player1Score > data.player2Score) {
 
       {/* Play again button */}
       {gameOver && (
-        <button onClick={resetGame} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+        <button onClick={resetGame} className=" relative z-20 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
           Play Again
         </button>
       )}
       <div>
-      <h2>Round Results</h2>
+      <h2 className="relative z-20">Round Results</h2>
       {roundResults.length === 0 ? (
         <p>Loading...</p>
       ) : (
         <ul>
           {roundResults && roundResults.map((result, index) => (
-            <li key={index}>{result}</li>
+            <li className="relative z-20" key={index}>{result}</li>
           ))}
         </ul>
       )}
