@@ -85,6 +85,8 @@ const EnhancedGameLobby = ({
   // }, [gameId, gameMode, entryFee, tournamentMatches]);
 useEffect(() => {
     // Get userId from localStorage
+    localStorage.removeItem("match_found");
+
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser && storedUser._id) {
       setUserId(storedUser._id);
