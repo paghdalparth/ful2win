@@ -10,6 +10,7 @@ import TictactoeGameLogic from "../games/Tictactoe/TictactoeGameLogic";
 import CoinflipGameLogic from "../games/Coinflip/CoinflipGameLogic";
 import DiceGameLogic from "../games/Dice/DiceGameLogic";
 import StoneGameLogic from "../games/Stone-Paper/StoneGameLogic";
+import DuckHuntGame from "../games/DuckHunt/logic";
 import socket from '../socekt';
 const EnhancedGameLobby = ({
   entryFee = 10,
@@ -370,7 +371,8 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         "tictactoe": TictactoeGameLogic,
         "coinflip": CoinflipGameLogic,
         "dice": DiceGameLogic,
-        "stonepaper": StoneGameLogic
+        "stonepaper": StoneGameLogic,
+        "duckhuntgame": DuckHuntGame
       };
       
       // Get the component from the map or use a fallback

@@ -8,8 +8,8 @@ export default function GameCatalog() {
   const navigate = useNavigate()
 
   const games = {
-    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch"],
-    Board: ["TicTacToe", "Ludo", "Carrom", "Chess"],
+    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch", "DuckHuntGame"],
+    Board: ["TicTacToe", "Ludo", "Carrom", "Chess", "DuckHuntGame"],
     Action: ["Freefire", "BGMI"],
     Card: ["Uno"],
     Casino: ["StonePaper", "CoinFlip", "Dice", "MemoryMatch"]
@@ -27,6 +27,7 @@ export default function GameCatalog() {
     Dice: "/games/dice",
     MemoryMatch: "/games/memorymatch",
     StonePaper: "/games/stonepaper",
+    DuckHuntGame:"/games/DuckHuntGame",
   }
 
   // Track which games have actual implementations
@@ -50,6 +51,7 @@ export default function GameCatalog() {
     Dice: "/dice.png",
     MemoryMatch: "/memorymatch.png",
     StonePaper: "/stonepaper.jpg",
+    DuckHuntGame:"/DuckHuntGame.jpg",
   }
 
   const gameCategories = {
@@ -64,6 +66,7 @@ export default function GameCatalog() {
     Dice: "Casino",
     MemoryMatch: "Casino",
     StonePaper: "Casino",
+    DuckHuntGame: "Board",
   }
 
   const handleGameClick = (game) => {
