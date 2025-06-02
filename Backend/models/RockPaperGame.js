@@ -48,6 +48,11 @@ const RockPaperGameSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
+  currentPlayerTurn: {
+    type: String,
+    enum: ['player1', 'player2'],
+    default: 'player1'
+  },
   status: {
     type: String,
     enum: ['ongoing', 'finished'],

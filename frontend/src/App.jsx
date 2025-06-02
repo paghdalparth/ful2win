@@ -42,6 +42,7 @@ import GameResultLobby from './components/GameResultLobby';
 import TictactoeGameLogic from './games/Tictactoe/TictactoeGameLogic';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
+import DuckHuntGame from './games/DuckHunt/logic';
 
 function HomePage() {
   const [showSplash, setShowSplash] = useState(() => {
@@ -312,6 +313,13 @@ function App() {
             gameCategory="Casino"
           /></PrivateRoute>
         } />
+        <Route path="/games/DuckHuntGame" element={<PrivateRoute>
+          <GameDashboard 
+            gameTitle="DuckHuntGame" 
+            gameImage="/DuckHuntGame.jpg"
+            gameCategory="Board"
+          /></PrivateRoute>
+        } />
         
         {/* Direct game routes (accessible after selecting mode in dashboard) */}
         <Route path="/games/tictactoe/play" element={<PrivateRoute><TicTacToe /></PrivateRoute>} />
@@ -319,6 +327,7 @@ function App() {
         <Route path="/games/memorymatch/play" element={<PrivateRoute><MemoryMatchGame /></PrivateRoute>} />
         <Route path="/games/dice/play" element={<PrivateRoute><DiceDuel /></PrivateRoute>} />
         <Route path="/games/coinflip/play" element={<PrivateRoute><CoinFlipBet /></PrivateRoute>} />
+        <Route path="/games/DuckHuntGame/play" element={<PrivateRoute><DuckHuntGame /></PrivateRoute>} />
         
         {/* Coming Soon Games */}
         <Route path="/games/ludo" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
@@ -370,6 +379,10 @@ function App() {
           element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="stonepaper" /></PrivateRoute>} 
         />
         <Route 
+          path="/games/DuckHuntGame/*" 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="DuckHuntGame" /></PrivateRoute>} 
+        />
+        <Route 
           path="/games/bgmi/*" 
           element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="bgmi" /></PrivateRoute>} 
         />
@@ -392,6 +405,7 @@ function App() {
         
         <Route path="*" element={<PrivateRoute><NotFound /></PrivateRoute>} />
         <Route path="/login" element={<GamingLoginMobile />} />
+        <Route path="/DuckHuntGame" element={<DuckHuntGame />} />
         {/* <Route path="/g" element={<PrivateRoute><TictactoeGameLogic /></PrivateRoute>} /> */}
         
       </Routes>

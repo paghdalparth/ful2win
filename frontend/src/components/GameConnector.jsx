@@ -110,6 +110,8 @@ const GameConnector = () => {
         return 'Dice';
       case 'memorymatch':
         return 'Memory Match';
+      case 'DuckHuntGame':
+        return 'DuckHuntGame';
       default:
         return gameId ? gameId.charAt(0).toUpperCase() + gameId.slice(1) : 'Game';
     }

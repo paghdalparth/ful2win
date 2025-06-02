@@ -15,6 +15,7 @@ router.post('/create', async (req, res) => {
         { roundNumber: 3, status: 'pending' }
       ],
       currentRound: 1,
+      currentPlayerTurn: 'player1',
       player1Score: 0,
       player2Score: 0
     };
@@ -37,6 +38,19 @@ router.get('/room/:roomId', async (req, res) => {
   }
 });
 
+// Get current player turn
+router.get('/current-turn/:gameId', async (req, res) => {
+  try {
+    const game = await RockPaperGame.findById(req.params.gameId);
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+    res.status(200).json({ currentPlayerTurn: game.currentPlayerTurn });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // Update player move for current round
 router.put('/move/:gameId', async (req, res) => {
   try {
@@ -47,6 +61,15 @@ router.put('/move/:gameId', async (req, res) => {
       return res.status(404).json({ error: 'Game not found' });
     }
 
+    // Check if it's the player's turn
+    const isPlayer1 = game.player1.playerId === playerId;
+    const isPlayer2 = game.player2.playerId === playerId;
+    const currentTurn = game.currentPlayerTurn;
+
+    if ((isPlayer1 && currentTurn !== 'player1') || (isPlayer2 && currentTurn !== 'player2')) {
+      return res.status(400).json({ error: 'Not your turn' });
+    }
+
     // Find the current round
     const currentRound = game.rounds.find(r => r.roundNumber === roundNumber);
     if (!currentRound) {
@@ -54,10 +77,12 @@ router.put('/move/:gameId', async (req, res) => {
     }
 
     // Update the appropriate player's move
-    if (game.player1.playerId === playerId) {
+    if (isPlayer1) {
       currentRound.player1Move = move;
-    } else if (game.player2.playerId === playerId) {
+      game.currentPlayerTurn = 'player2';
+    } else if (isPlayer2) {
       currentRound.player2Move = move;
+      game.currentPlayerTurn = 'player1';
     } else {
       return res.status(400).json({ error: 'Invalid player' });
     }

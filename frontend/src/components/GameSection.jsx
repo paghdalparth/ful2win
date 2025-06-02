@@ -9,8 +9,8 @@ export default function GameSection() {
   const [activeDashboard, setActiveDashboard] = useState(null)
 
   const games = {
-    All: ["Ludo", "Carrom", "Chess", "BGMI", "Freefire", "TicTacToe", "Uno", "CoinFlip", "Dice", "MemoryMatch", "StonePaper"],
-    Board: ["Ludo", "Carrom", "Chess", "TicTacToe"],
+    All: ["Ludo", "Carrom", "Chess", "BGMI", "Freefire", "TicTacToe", "Uno", "CoinFlip", "Dice", "MemoryMatch", "StonePaper","DuckHuntGame"],
+    Board: ["Ludo", "Carrom", "Chess", "TicTacToe", "DuckHuntGame"],
     Action: ["BGMI", "Freefire"],
     Card: ["Uno"],
     Casino: ["CoinFlip", "Dice", "StonePaper"]
@@ -28,6 +28,7 @@ export default function GameSection() {
     Dice: "/games/dice",
     MemoryMatch: "/games/memorymatch",
     StonePaper:"/games/stonePaper",
+    DuckHuntGame:"/games/DuckHuntGame",
   }
 
   const gameImages = {
@@ -41,7 +42,7 @@ export default function GameSection() {
     CoinFlip: "/coinflip.jpg",
     Dice: "/dice.png",
     MemoryMatch: "/memorymatch.png",
-    StonePaper:"/stonepaper.jpg",
+    DuckHuntGame:"/DuckHuntGame.jpg",
   }
 
   const gameCategories = {
@@ -57,6 +58,7 @@ export default function GameSection() {
     Dice: "Casino",
     MemoryMatch: "Casino",
     StonePaper: "Casino",
+    DuckHuntGame: "Board",
   }
 
   // Default entry fees for all games (can be customized per game if needed)

@@ -10,6 +10,7 @@ import TictactoeGameLogic from "../games/Tictactoe/TictactoeGameLogic";
 import CoinflipGameLogic from "../games/Coinflip/CoinflipGameLogic";
 import DiceGameLogic from "../games/Dice/DiceGameLogic";
 import StoneGameLogic from "../games/Stone-Paper/StoneGameLogic";
+import DuckHuntGame from "../games/DuckHunt/logic";
 import socket from '../socekt';
 const EnhancedGameLobby = ({
   entryFee = 10,
@@ -35,7 +36,8 @@ const EnhancedGameLobby = ({
   const [roomId, setRoomId] = useState(null);
   const [userId, setUserId] = useState(null);
   const [status, setStatus] = useState(initialStatus);
-  const [timeLeft, setTimeLeft] = useState(3);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [matchFoundTimeLeft, setMatchFoundTimeLeft] = useState(3);
   const [gameBg, setGameBg] = useState("");
   const [playersInQueue, setPlayersInQueue] = useState(1243);
   const [score, setScore] = useState({ player: 0, opponent: 0 });
@@ -84,6 +86,8 @@ const EnhancedGameLobby = ({
   // }, [gameId, gameMode, entryFee, tournamentMatches]);
 useEffect(() => {
     // Get userId from localStorage
+    localStorage.removeItem("match_found");
+
     const storedUser = JSON.parse(localStorage.getItem('user'));
     if (storedUser && storedUser._id) {
       setUserId(storedUser._id);
@@ -105,18 +109,17 @@ useEffect(() => {
     socket.on('waiting_for_opponent', () => {
       console.log("Received waiting_for_opponent event");
       setStatus('matching');
-      setTimeLeft(3);
+      setTimeLeft(15);
     });
 
     socket.on('match_found', ({ roomId, players }) => {
       console.log("Received match_found event", { roomId, players });
-      
-// Example usage
-deductEntryFee(entryFee);
+      deductEntryFee(entryFee);
       console.log("entryfees"+entryFee)
       localStorage.setItem("match_found", JSON.stringify({ roomId, players }));
       setStatus('matched');
       setRoomId(roomId);
+      setMatchFoundTimeLeft(3); // Reset match found timer
       
       // Add a delay before starting the game
       setTimeout(() => {
@@ -163,28 +166,17 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
 
   // Start matchmaking
   const findMatch = () => {
-    console.log("Starting findMatch function");
-    console.log("Current status:", status);
-    console.log("Current userId:", userId);
-    
     if (!userId) {
-      console.log("User not logged in");
       setStatus('User not logged in.');
       return;
     }
 
-    // Force a state update to ensure it changes
     setStatus("matching");
-    setTimeLeft(3);
+    setTimeLeft(15);
     
-    // Add a small delay to ensure state updates are processed
     setTimeout(() => {
-      console.log("Emitting join_matchmaking");
       socket.emit('join_matchmaking', { userId, gameId });
-      console.log("Status after emit:", status);
     }, 100);
-
-    setPlayersInQueue(Math.floor(Math.random() * 500) + 500);
   };
 
   // Handle action game room creation
@@ -211,18 +203,9 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         if (timeLeft > 0) {
           setTimeLeft(timeLeft - 1);
         } else {
-          setOpponent({
-            name: `Player_${Math.floor(Math.random() * 10000)}`,
-            skill: ["Novice", "Intermediate", "Expert"][Math.floor(Math.random() * 3)],
-            avatar: `/avatar${Math.floor(Math.random() * 5) + 1}.jpg`
-          });
-          
-          if (isActionGame) {
-            handleActionGame();
-          } else {
-            setStatus("matched");
-            setTimeLeft(3);
-          }
+          // If no match found after 15 seconds, go back to waiting
+          setStatus("waiting");
+          setTimeLeft(15);
         }
       }, 1000);
 
@@ -232,8 +215,8 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
       };
     } else if (status === "matched") {
       timer = setTimeout(() => {
-        if (timeLeft > 0) {
-          setTimeLeft(timeLeft - 1);
+        if (matchFoundTimeLeft > 0) {
+          setMatchFoundTimeLeft(matchFoundTimeLeft - 1);
         } else {
           setStatus("gaming");
         }
@@ -241,7 +224,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
       
       return () => clearTimeout(timer);
     }
-  }, [status, timeLeft, isActionGame]);
+  }, [status, timeLeft, matchFoundTimeLeft]);
 
   // Play Again countdown timer
   const startPlayAgainCountdown = () => {
@@ -294,7 +277,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
     });
     
     setStatus("matched");
-    setTimeLeft(3);
+    setTimeLeft(15);
     
     if (playAgainTimerRef.current) {
       clearInterval(playAgainTimerRef.current);
@@ -380,6 +363,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
     console.log("Current status:", status);
     
     // Try to dynamically import and render game component based on gameId
+    if(localStorage.getItem("match_found")){
     try {
       // Map of game IDs to their corresponding logic components
       const gameComponents = {
@@ -387,7 +371,8 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         "tictactoe": TictactoeGameLogic,
         "coinflip": CoinflipGameLogic,
         "dice": DiceGameLogic,
-        "stonepaper": StoneGameLogic
+        "stonepaper": StoneGameLogic,
+        "duckhuntgame": DuckHuntGame
       };
       
       // Get the component from the map or use a fallback
@@ -430,6 +415,10 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         </div>
       );
     }
+    }else{
+      console.log("nothing")
+    }
+
   };
 
   return (
@@ -613,11 +602,11 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
               <div className="flex justify-center items-center">
                 <motion.div 
                   className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
-                  key={timeLeft}
+                  key={matchFoundTimeLeft}
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 1 }}
                 >
-                  <span className="text-2xl font-light text-white">{timeLeft}</span>
+                  <span className="text-2xl font-light text-white">{matchFoundTimeLeft}</span>
                 </motion.div>
               </div>
             </div>
