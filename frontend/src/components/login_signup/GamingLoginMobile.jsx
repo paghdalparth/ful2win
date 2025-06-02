@@ -27,6 +27,12 @@ const validatePhone = (phone) => {
   return re.test(String(phone))
 }
 
+const validateUsername = (username) => {
+  // Username validation: 3-30 chars, alphanumeric and underscore only
+  const re = /^[a-zA-Z0-9_]{3,30}$/;
+  return re.test(String(username));
+}
+
 const validatePassword = (password) => {
   // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
   const hasLength = password.length >= 8
@@ -239,17 +245,20 @@ const navigate = useNavigate();
 
   const [signupForm, setSignupForm] = useState({
     name: "",
+    username: "",
     phone: "",
     password: "",
     confirmPassword: "",
     touched: {
       name: false,
+      username: false,
       phone: false,
       password: false,
       confirmPassword: false,
     },
     errors: {
       name: "",
+      username: "",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -365,6 +374,34 @@ const navigate = useNavigate();
       }
     }
 
+    if (signupForm.touched.username) {
+      if (!signupForm.username) {
+        setSignupForm((prev) => ({
+          ...prev,
+          errors: {
+            ...prev.errors,
+            username: "Username is required",
+          },
+        }));
+      } else if (!validateUsername(signupForm.username)) {
+        setSignupForm((prev) => ({
+          ...prev,
+          errors: {
+            ...prev.errors,
+            username: "Username must be 3-30 characters and can only contain letters, numbers, and underscores",
+          },
+        }));
+      } else {
+        setSignupForm((prev) => ({
+          ...prev,
+          errors: {
+            ...prev.errors,
+            username: "",
+          },
+        }));
+      }
+    }
+
     if (signupForm.touched.phone) {
       if (!signupForm.phone) {
         setSignupForm((prev) => ({
@@ -448,7 +485,7 @@ const navigate = useNavigate();
         }))
       }
     }
-  }, [signupForm.name, signupForm.phone, signupForm.password, signupForm.confirmPassword, signupForm.touched])
+  }, [signupForm.name, signupForm.username, signupForm.phone, signupForm.password, signupForm.confirmPassword, signupForm.touched])
 
   // Check if login form is valid
   const isLoginFormValid = () => {
@@ -461,10 +498,12 @@ const navigate = useNavigate();
   const isSignupFormValid = () => {
     return (
       signupForm.name &&
+      signupForm.username &&
       signupForm.phone &&
       signupForm.password &&
       signupForm.confirmPassword &&
       !signupForm.errors.name &&
+      !signupForm.errors.username &&
       !signupForm.errors.phone &&
       !signupForm.errors.password &&
       !signupForm.errors.confirmPassword &&
@@ -672,6 +711,7 @@ const handleLogin = async (e) => {
     ...prev,
     touched: {
       name: true,
+      username: true,
       phone: true,
       password: true,
       confirmPassword: true,
@@ -702,6 +742,7 @@ const handleLogin = async (e) => {
       },
       body: JSON.stringify({
         fullName: signupForm.name,
+        username: signupForm.username,
         phoneNumber: signupForm.phone,
         password: signupForm.password,
       }),
@@ -919,6 +960,20 @@ const handleLogin = async (e) => {
                       touched={signupForm.touched.name}
                       valid={signupForm.touched.name && !signupForm.errors.name && signupForm.name}
                       label="Full Name"
+                      required
+                    />
+
+                    <GlowInput
+                      type="text"
+                      name="username"
+                      placeholder="Choose Username"
+                      icon={<FaUser size={14} />}
+                      value={signupForm.username}
+                      onChange={handleSignupChange}
+                      error={signupForm.errors.username}
+                      touched={signupForm.touched.username}
+                      valid={signupForm.touched.username && !signupForm.errors.username && signupForm.username}
+                      label="Username"
                       required
                     />
 

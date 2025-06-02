@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
+const authMiddleware = require('../middleware/authMiddleware');
 // const dummyUsers = require('../data/dummyUsers');
 
 // Multer setup for file uploads
@@ -145,6 +146,48 @@ router.post('/profile-image', upload.single('profileImage'), async (req, res) =>
     await User.findByIdAndUpdate(userId, { profileImage: imageUrl });
     res.json({ imageUrl });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update user information
+router.patch('/:userId', authMiddleware, async (req, res) => {
+  try {
+    const { username } = req.body;
+    const userId = req.params.userId;
+
+    // Ensure user can only update their own profile
+    if (userId !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to update this profile' });
+    }
+
+    // Validate user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // If username is being updated, check for uniqueness
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+    }
+
+    // Only allow username updates
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { username } },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Update user error:', error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 });

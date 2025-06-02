@@ -123,7 +123,7 @@ export default function GameCatalog() {
               <img
                 src={gameImages[game] || "/placeholder.svg"}
                 alt={game}
-                className="w-full h-full object-contain bg-gradient-to-b from-black/20 to-black/40"
+                className="w-full h-full object-cover bg-gradient-to-b from-black/20 to-black/40"
                 onError={(e) => {
                   e.target.src = "/fallback.jpg" // Fallback image
                 }}

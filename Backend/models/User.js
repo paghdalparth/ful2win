@@ -8,6 +8,15 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minlength: 3,
+    maxlength: 30,
+    match: /^[a-zA-Z0-9_]+$/ // Only alphanumeric and underscore allowed
+  },
   phoneNumber: {
     type: String,
     required: true,

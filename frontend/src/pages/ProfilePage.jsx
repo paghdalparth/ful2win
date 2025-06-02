@@ -83,13 +83,38 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
   };
 
   const handleUsernameChange = (event) => {
-    setUserData({...userData, fullName: event.target.value});
+    setUserData({...userData, username: event.target.value});
   };
 
-  // Add a function to save the username (placeholder for actual save logic)
-  const saveUsername = () => {
-    console.log("Saving username:", userData); // Replace with API call to save username
-    setIsEditingUsername(false);
+  const saveUsername = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login to update your profile');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/users/${userData._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ username: userData.username }),
+      });
+      
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUserData(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setIsEditingUsername(false);
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Failed to update username');
+      }
+    } catch (err) {
+      alert('Failed to update username');
+    }
   };
 
   // Handle image upload
@@ -125,10 +150,10 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-20">
       {/* Header */}
-      <Navbar />
+      {/* <Navbar /> */}
       
       {/* Profile Header */}
-      <div className="relative pt-24 px-4">
+      <div className="relative pt-6 px-4">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
             <div
@@ -245,29 +270,39 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
                   <h3 className="font-bold flex items-center gap-2">
                     <User className="text-purple-400" /> Account
                   </h3>
-                  <button onClick={handleEditUsernameClick} className="text-purple-400 text-sm">{isEditingUsername ? 'Cancel' : 'Edit'}</button>
                 </div>
                 <div className="divide-y divide-gray-700">
+                  <div className="p-4 flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-gray-400">Name</p>
+                      <p>{userData?.fullName || "Guest User"}</p>
+                    </div>
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  
                   <div className="p-4 flex justify-between items-center">
                     <div>
                       <p className="text-sm text-gray-400">Username</p>
                       {isEditingUsername ? (
                         <input
                           type="text"
-                          value={userData?.fullName || ""}
-                          onChange={(e) => setUserData({...userData, fullName: e.target.value})}
+                          value={userData?.username || ""}
+                          onChange={(e) => setUserData({...userData, username: e.target.value})}
                           className="bg-gray-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          placeholder="Choose a unique username"
                         />
                       ) : (
-                        <p>{userData?.fullName || "Guest User"}</p>
+                        <p>@{userData?.username || "username"}</p>
                       )}
                     </div>
                     {isEditingUsername ? (
                       <button onClick={saveUsername} className="text-green-400">
-                         <Check className="h-5 w-5" />
+                        <Check className="h-5 w-5" />
                       </button>
                     ) : (
-                    <Edit className="h-5 w-5 text-gray-400" />
+                      <button onClick={() => setIsEditingUsername(true)} className="text-gray-400 hover:text-purple-400">
+                        <Edit className="h-5 w-5" />
+                      </button>
                     )}
                   </div>
                   

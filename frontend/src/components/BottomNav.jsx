@@ -51,12 +51,12 @@ export default function BottomNav() {
           <div className="flex items-center justify-center px-4 -mt-10">
             <Link
               to="/"
-              className="bg-gradient-to-br from-purple-600 to-blue-600 p-1 shadow-xl hover:scale-105 transition"
+              className="bg-gradient-to-br from-purple-600 to-blue-600 p-1 shadow-xl hover:scale-105 transition rounded-xl"
             >
               <img
                 src="/images/logo.jpg"
                 alt="ful2win Logo"
-                className="h-14 w-14 bg-white/90 shadow-md"
+                className="h-14 w-14 bg-white/90 shadow-md rounded-xl"
               />
             </Link>
           </div>

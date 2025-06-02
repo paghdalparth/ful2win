@@ -112,10 +112,11 @@ export default function PostsFeed({
       {posts.length > 0 ? (
         posts.map((post) => {
           const authorName = post.author || "Unknown User"
-          const authorAvatar = "/images/avatars/default-avatar.jpg"
           // Find the user object that matches the author name
           const authorUser = users.find(user => user.name === authorName || user.fullName === authorName)
           const authorId = authorUser?.id || authorUser?._id
+          // Get the author's avatar from the user data, with fallback to default
+          const authorAvatar = authorUser?.avatar || authorUser?.profileImage || "/images/avatars/default-avatar.jpg"
           // Get following status from state
           const isUserFollowing = authorId ? followingStatus[authorId] || false : false
 
@@ -284,10 +285,11 @@ export default function PostsFeed({
                     </h4>
                     {post.comments.map((comment) => {
                         const commentAuthorName = getCommentAuthorName(comment);
-                        const commentAuthorAvatar = "/images/avatars/default-avatar.jpg"
                         // Find the user object that matches the comment author name
                         const commentAuthorUser = users.find(user => user.name === commentAuthorName || user.fullName === commentAuthorName)
                         const commentAuthorId = commentAuthorUser?.id || commentAuthorUser?._id
+                        // Get the comment author's avatar from the user data, with fallback to default
+                        const commentAuthorAvatar = commentAuthorUser?.avatar || commentAuthorUser?.profileImage || "/images/avatars/default-avatar.jpg"
 
                       return (
                           <div key={comment._id || comment.id} className="flex space-x-3 fade-in min-h-[40px] items-start">

@@ -114,6 +114,7 @@ export default function useCommunityData() {
             ...user,
             id: user._id || `temp-${Math.random()}`,
             name: user.fullName || user.name || 'Unknown User', // Use fullName as name, fallback to name or Unknown
+            avatar: user.profileImage ? (user.profileImage.startsWith('http') ? user.profileImage : `${API_BASE_URL}${user.profileImage}`) : '/placeholder.svg',
             coins: user.Balance || 0, // Map Balance to coins for rankings
             followers: user.followers || [], // Ensure followers is an array
             following: user.following || [], // Ensure following is an array

@@ -5,10 +5,10 @@ const prizes = [
   { id: 2, label: '20', color: '#FF9F80' },
   { id: 3, label: '40', color: '#4DEEEA' },
   { id: 4, label: '80', color: '#44F261' },
-  { id: 5, label: '20', color: '#FF9F80' },
-  { id: 6, label: '100', color: '#FF4F9A' },
-  { id: 7, label: '40', color: '#4DEEEA' },
-  { id: 8, label: '10', color: '#FFF066' },
+  { id: 5, label: '100', color: '#FF9F80' },
+  { id: 6, label: '150', color: '#FF4F9A' },
+  { id: 7, label: '200', color: '#4DEEEA' },
+  { id: 8, label: '250', color: '#FFF066' },
 ];
 
 const DAILY_SPIN_LIMIT = 5;
