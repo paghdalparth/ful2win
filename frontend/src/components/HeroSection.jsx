@@ -110,7 +110,7 @@ export default function HeroSection() {
       />
 
       {/* Main Content */}
-      <div className="relative z-20 w-full flex flex-col items-center justify-center gap-8 px-4">
+      <div className="relative z-20 w-full flex flex-col items-center justify-center gap-4 px-4">
         {/* Game Carousel */}
         <div className="relative flex flex-col items-center justify-center min-h-[350px] w-full max-w-lg mx-auto">
           <button
@@ -145,7 +145,7 @@ export default function HeroSection() {
         </div>
 
         {/* Winning Stats */}
-        <div className="relative z-20 w-full max-w-4xl mx-auto mt-8 px-4">
+        <div className="relative z-20 w-full max-w-4xl mx-auto mt-4 px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Total Winnings */}
             <div className="glass-effect rounded-2xl p-4 backdrop-blur-md border border-white/10 hover:scale-105 transition-all duration-300 group">

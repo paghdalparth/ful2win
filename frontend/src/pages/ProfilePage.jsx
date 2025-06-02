@@ -1,7 +1,7 @@
 "use client"
 import Navbar from '../components/Navbar';
 import BottomNav from '../components/BottomNav';
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 // import {Link} from "react-router-dom";
 import {
   Bell,
@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useWallet } from '../context/WalletContext';
+// import defaultAvatar from '../assets/default-avatar.png'; // Add a default avatar if you have one
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -40,6 +41,11 @@ export default function ProfilePage() {
 const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [profileImage, setProfileImage] = useState(() => {
+    // Try to load from localStorage
+    return localStorage.getItem('profileImage') || '';
+  });
+  const fileInputRef = useRef();
 
   const { balance } = useWallet();
 
@@ -47,7 +53,19 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
     // Get user data from localStorage
     const user = JSON.parse(localStorage.getItem('user'));
     setIsLoggedIn(!!user);
-    setUserData(user);
+    if (user && user._id) {
+      // Always fetch latest user data from backend
+      fetch(`http://localhost:5000/api/users/${user._id}`)
+        .then(res => res.json())
+        .then(freshUser => {
+          setUserData(freshUser);
+          setProfileImage(freshUser.profileImage || '');
+          localStorage.setItem('user', JSON.stringify(freshUser));
+        });
+    } else {
+      setUserData(user);
+      setProfileImage('');
+    }
   }, []);
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -74,6 +92,36 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
     setIsEditingUsername(false);
   };
 
+  // Handle image upload
+  const handleProfileImageClick = () => {
+    fileInputRef.current.click();
+  };
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file && userData?._id) {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      formData.append('userId', userData._id);
+      try {
+        const res = await fetch('http://localhost:5000/api/users/profile-image', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.imageUrl) {
+          setProfileImage(data.imageUrl);
+          // Fetch updated user data
+          const userRes = await fetch(`http://localhost:5000/api/users/${userData._id}`);
+          const updatedUser = await userRes.json();
+          setUserData(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+      } catch (err) {
+        alert('Failed to upload image');
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-20">
       {/* Header */}
@@ -83,8 +131,24 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
       <div className="relative pt-24 px-4">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full border-2 border-purple-500 overflow-hidden bg-gray-700 flex items-center justify-center">
-              <User className="h-10 w-10 text-gray-400" />
+            <div
+              className="w-20 h-20 rounded-full border-2 border-purple-500 overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer group"
+              onClick={handleProfileImageClick}
+              title="Click to upload profile image"
+            >
+              {profileImage ? (
+                <img src={profileImage.startsWith('http') ? profileImage : `http://localhost:5000${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="h-10 w-10 text-gray-400" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleProfileImageChange}
+                className="hidden"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs text-white font-semibold transition-opacity">Change</div>
             </div>
             <div className="absolute -bottom-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full flex items-center">
               <Trophy className="h-3 w-3 mr-1" /> PRO

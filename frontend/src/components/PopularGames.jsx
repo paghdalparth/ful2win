@@ -212,7 +212,11 @@ export default function PopularGames() {
           : 'bg-white/10 text-white/80 hover:bg-white/15'
       }`}
     >
-      <tab.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+      {tab.id === 'real' ? (
+        <Crown className="h-6 w-6 scale-150" />
+      ) : (
+        <Target className="h-6 w-6" />
+      )}
       <span className="whitespace-nowrap">{tab.label}</span>
     </button>
   ))}

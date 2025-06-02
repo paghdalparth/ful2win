@@ -20,7 +20,7 @@ const server = http.createServer(app);
 // Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://ful2win.onrender.com"],  // Your deployed frontend URL
+    origin: ["http://localhost:3000","http://localhost:5173" , "https://ful2win.onrender.com"],  // Your deployed frontend URL
     methods: ["GET", "POST", "PUT"],
   },
 });
@@ -32,9 +32,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: ["http://localhost:3000", "https://ful2win.onrender.com"]
+  origin: ["http://localhost:3000", "http://localhost:5173" , "https://ful2win.onrender.com"]
 }));
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // Connect MongoDB
 require('./config/db')();

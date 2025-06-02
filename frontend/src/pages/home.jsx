@@ -34,7 +34,7 @@ export default function HomePage() {
           <div className="flex items-center">
             <img 
               src="/images/logo.jpg" 
-              alt="ful2win" 
+              alt="Ful2Win" 
               className="h-10 w-10 rounded-lg mr-2" 
             />
             <span className="font-bold text-white text-lg">BoostNow</span>

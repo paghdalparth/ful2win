@@ -44,16 +44,29 @@ import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
 
 function HomePage() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    // Only show splash if not shown before in this session
+    return !localStorage.getItem('splashShown');
+  });
   const canvasRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
-    const timer = setTimeout(() => setShowSplash(false), 2000);
-    return () => {
-      document.documentElement.style.scrollBehavior = '';
-      clearTimeout(timer);
-    };
+    if (!localStorage.getItem('splashShown')) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        localStorage.setItem('splashShown', 'true');
+      }, 2000);
+      return () => {
+        document.documentElement.style.scrollBehavior = '';
+        clearTimeout(timer);
+      };
+    } else {
+      setShowSplash(false);
+      return () => {
+        document.documentElement.style.scrollBehavior = '';
+      };
+    }
   }, []);
 
   useEffect(() => {
@@ -207,7 +220,7 @@ function HomePage() {
                 className="h-24 w-24 mb-6 rounded-2xl shadow-2xl animate-float"
               />
               <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg tracking-wide animate-pulse-glow">
-                ful2win
+                Ful2Win
               </h1>
             </div>
           </div>

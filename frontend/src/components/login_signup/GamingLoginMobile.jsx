@@ -58,7 +58,7 @@ const GlowCheckbox = ({ id, label, required, ...props }) => {
         <input
           id={id}
           type="checkbox"
-          className="appearance-none h-5 w-5 border border-white/20 rounded bg-black/30 checked:bg-purple-600 checked:border-0 transition-colors cursor-pointer"
+          className="appearance-none h-5 w-5 border border-white/20 rounded bg-black/30 transition-colors cursor-pointer peer"
           required={required}
           {...props}
         />
@@ -122,7 +122,7 @@ const GlowInput = ({ icon, error, touched, valid, label, ...props }) => (
 )
 
 // Password Input with toggle and strength indicator
-const PasswordInput = ({ value, onChange, error, touched, valid, label, ...props }) => {
+const PasswordInput = ({ value, onChange, error, touched, valid, label, showRequirements = false, ...props }) => {
   const [showPassword, setShowPassword] = useState(false)
   const passwordValidation = validatePassword(value || "")
 
@@ -159,7 +159,7 @@ const PasswordInput = ({ value, onChange, error, touched, valid, label, ...props
 
       {touched && error && <p className="text-xs text-red-500 pl-1">{error}</p>}
 
-      {value && value.length > 0 && (
+      {showRequirements && value && value.length > 0 && (
         <div className="space-y-1 mt-2">
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((level) => (
@@ -453,7 +453,7 @@ const navigate = useNavigate();
   // Check if login form is valid
   const isLoginFormValid = () => {
     return (
-      loginForm.phone && loginForm.password && !loginForm.errors.phone && !loginForm.errors.password && termsAccepted
+      loginForm.phone && loginForm.password && !loginForm.errors.phone && !loginForm.errors.password
     )
   }
 
@@ -650,6 +650,7 @@ const handleLogin = async (e) => {
     // Save token & user in localStorage
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.removeItem('splashShown'); // Clear splash flag so it shows after login
 
     // Redirect to home page
     navigate('/');
@@ -852,6 +853,7 @@ const handleLogin = async (e) => {
                       valid={loginForm.touched.password && !loginForm.errors.password && loginForm.password}
                       label="Password"
                       required
+                      showRequirements={false}
                     />
                   </div>
 
@@ -860,26 +862,6 @@ const handleLogin = async (e) => {
                       Forgot Password?
                     </a>
                   </div>
-
-                  {/* Terms checkbox */}
-                  <GlowCheckbox
-                    id="terms-login"
-                    required
-                    checked={termsAccepted}
-                    onChange={(e) => setTermsAccepted(e.target.checked)}
-                    label={
-                      <>
-                        I agree to the{" "}
-                        <a href="#" className="text-blue-400 hover:underline">
-                          Terms
-                        </a>{" "}
-                        and{" "}
-                        <a href="#" className="text-blue-400 hover:underline">
-                          Privacy Policy
-                        </a>
-                      </>
-                    }
-                  />
 
                   <GlowButton
                     gradient="bg-gradient-to-r from-blue-600 to-purple-600"
@@ -964,6 +946,7 @@ const handleLogin = async (e) => {
                       valid={signupForm.touched.password && !signupForm.errors.password && signupForm.password}
                       label="Create Password"
                       required
+                      showRequirements={true}
                     />
 
                     <PasswordInput
@@ -980,6 +963,7 @@ const handleLogin = async (e) => {
                       }
                       label="Confirm Password"
                       required
+                      showRequirements={false}
                     />
                   </div>
 
@@ -1071,7 +1055,7 @@ const handleLogin = async (e) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          © 2023 Ful2win. All rights reserved.
+          © 2025 Ful2Win. All rights reserved.
         </motion.div>
       </motion.div>
     </div>

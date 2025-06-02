@@ -282,7 +282,7 @@ const GamingLoginScreen = () => {
         >
           <h1 className="text-5xl font-extrabold tracking-tight">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-red-500 animate-gradient">
-              FUL2WIN
+              Ful2Win
             </span>
           </h1>
           <motion.div

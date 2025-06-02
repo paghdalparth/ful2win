@@ -8,6 +8,9 @@ export default {
   darkMode: "class", // Enable class-based dark mode
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Poppins", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+      },
       animation: {
         "fade-in": "fadeIn 0.3s ease-in-out",
         "slide-down": "slideDown 0.3s ease-in-out",

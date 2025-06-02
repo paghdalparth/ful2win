@@ -16,7 +16,7 @@ export default function BottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[9999]">
       <div className="mx-auto max-w-2xl">
-        <div className="glass-effect bg-gradient-to-tr from-gray-900/95 via-purple-900/90 to-gray-900/95 backdrop-blur-xl border-t border-gray-800/50 shadow-2xl rounded-t-2xl flex justify-around items-center h-20 px-2">
+        <div className="glass-effect bg-gradient-to-tr from-gray-900/95 via-purple-900/90 to-gray-900/95 backdrop-blur-xl border-t border-gray-800/50 shadow-2xl flex justify-around items-center h-20 px-2 rounded-t-2xl">
           
           {/* Left Navigation Items */}
           <div className="flex-1 flex justify-around">
@@ -51,12 +51,12 @@ export default function BottomNav() {
           <div className="flex items-center justify-center px-4 -mt-10">
             <Link
               to="/"
-              className="bg-gradient-to-br from-purple-600 to-blue-600 p-1 rounded-2xl shadow-xl hover:scale-105 transition"
+              className="bg-gradient-to-br from-purple-600 to-blue-600 p-1 shadow-xl hover:scale-105 transition"
             >
               <img
                 src="/images/logo.jpg"
                 alt="ful2win Logo"
-                className="h-14 w-14 rounded-2xl bg-white/90 shadow-md"
+                className="h-14 w-14 bg-white/90 shadow-md"
               />
             </Link>
           </div>

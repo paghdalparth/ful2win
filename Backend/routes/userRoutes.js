@@ -1,7 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const multer = require('multer');
+const path = require('path');
 // const dummyUsers = require('../data/dummyUsers');
+
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
 // Create dummy users
 // router.post('/create-dummy', async (req, res) => {
@@ -123,6 +132,19 @@ router.get('/:userId', async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error('Get user error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Profile image upload endpoint
+router.post('/profile-image', upload.single('profileImage'), async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    const imageUrl = `/uploads/${req.file.filename}`;
+    await User.findByIdAndUpdate(userId, { profileImage: imageUrl });
+    res.json({ imageUrl });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
