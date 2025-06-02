@@ -14,6 +14,7 @@ const chatRoutes = require('./routes/chat');
 const ticTacToeGameRoutes = require('./routes/ticTacToeGame');
 const rockPaperGameRoutes = require('./routes/rockPaperGameRoutes');
 const userRoutes = require('./routes/userRoutes');
+const DuckHunt = require('./models/DuckHunt');
 const app = express();
 const server = http.createServer(app);
 
@@ -49,6 +50,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
 app.use('/api/game', rockPaperGameRoutes);
 app.use('/api/protected', protected); // secured routes
+app.use('/api/duckhunt', DuckHunt); // secured routes
 
 // Socket.IO Connection
 
