@@ -35,6 +35,10 @@ import { Link } from "react-router-dom"
 import { useWallet } from '../context/WalletContext';
 // import defaultAvatar from '../assets/default-avatar.png'; // Add a default avatar if you have one
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || (process.env.NODE_ENV === 'production' 
+  ? "https://ful2win-backend.onrender.com"
+  : "http://localhost:5000");
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile")
   const [openAccordion, setOpenAccordion] = useState(null)
@@ -55,7 +59,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
     setIsLoggedIn(!!user);
     if (user && user._id) {
       // Always fetch latest user data from backend
-      fetch(`http://localhost:5000/api/users/${user._id}`)
+      fetch(`${API_BASE_URL}/api/users/${user._id}`)
         .then(res => res.json())
         .then(freshUser => {
           setUserData(freshUser);
@@ -94,7 +98,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/users/${userData._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${userData._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +132,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
       formData.append('profileImage', file);
       formData.append('userId', userData._id);
       try {
-        const res = await fetch('http://localhost:5000/api/users/profile-image', {
+        const res = await fetch(`${API_BASE_URL}/api/users/profile-image`, {
           method: 'POST',
           body: formData,
         });
@@ -136,7 +140,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
         if (data.imageUrl) {
           setProfileImage(data.imageUrl);
           // Fetch updated user data
-          const userRes = await fetch(`http://localhost:5000/api/users/${userData._id}`);
+          const userRes = await fetch(`${API_BASE_URL}/api/users/${userData._id}`);
           const updatedUser = await userRes.json();
           setUserData(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -162,7 +166,7 @@ const [isLoggedIn, setIsLoggedIn] = useState(false);
               title="Click to upload profile image"
             >
               {profileImage ? (
-                <img src={profileImage.startsWith('http') ? profileImage : `http://localhost:5000${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
+                <img src={profileImage.startsWith('http') ? profileImage : `${API_BASE_URL}${profileImage}`} alt="Profile" className="w-full h-full object-cover" />
               ) : (
                 <User className="h-10 w-10 text-gray-400" />
               )}
