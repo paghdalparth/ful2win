@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+const API_BASE_URL = import.meta.env.VITE_API_URL || (process.env.NODE_ENV === 'production' 
   ? "https://ful2win-backend.onrender.com"
-  : "http://localhost:5000"; // Use production URL in production, local in development
+  : "http://localhost:5000");
 
 export default function UserRankings({ users, rankingType, handleProfileClick }) {
   const [currentUserData, setCurrentUserData] = useState(null)
