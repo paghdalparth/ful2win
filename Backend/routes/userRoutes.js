@@ -49,53 +49,73 @@ router.post('/', async (req, res) => {
 // Follow/Unfollow a user
 router.post('/follow/:userId', async (req, res) => {
   try {
-    const { followerId } = req.body; // ID of the user who wants to follow
-    const followeeId = req.params.userId; // ID of the user to be followed
+    const { followerId } = req.body;
+    const followeeId = req.params.userId;
 
-    // Don't allow users to follow themselves
     if (followerId === followeeId) {
       return res.status(400).json({ message: 'Users cannot follow themselves' });
     }
 
-    // Find both users
-    const [follower, followee] = await Promise.all([
-      User.findById(followerId),
-      User.findById(followeeId)
+    // Use a single atomic operation to update both users
+    const result = await User.bulkWrite([
+      {
+        updateOne: {
+          filter: { _id: followerId },
+          update: {
+            $addToSet: { following: followeeId }
+          }
+        }
+      },
+      {
+        updateOne: {
+          filter: { _id: followeeId },
+          update: {
+            $addToSet: { followers: followerId }
+          }
+        }
+      }
     ]);
 
-    if (!follower || !followee) {
-      return res.status(404).json({ message: 'User not found' });
+    // If no documents were modified, they were already following each other
+    // So we need to unfollow
+    if (result.modifiedCount === 0) {
+      await User.bulkWrite([
+        {
+          updateOne: {
+            filter: { _id: followerId },
+            update: {
+              $pull: { following: followeeId }
+            }
+          }
+        },
+        {
+          updateOne: {
+            filter: { _id: followeeId },
+            update: {
+              $pull: { followers: followerId }
+            }
+          }
+        }
+      ]);
     }
 
-    // Initialize followers/following arrays if they don't exist
-    if (!follower.following) follower.following = [];
-    if (!followee.followers) followee.followers = [];
+    // Get the updated users to return their current state
+    const [updatedFollower, updatedFollowee] = await Promise.all([
+      User.findById(followerId).select('following'),
+      User.findById(followeeId).select('followers')
+    ]);
 
-    // Check if already following
-    const isFollowing = follower.following.includes(followeeId);
-
-    if (isFollowing) {
-      // Unfollow: Remove from both arrays
-      follower.following = follower.following.filter(id => id.toString() !== followeeId);
-      followee.followers = followee.followers.filter(id => id.toString() !== followerId);
-    } else {
-      // Follow: Add to both arrays
-      follower.following.push(followeeId);
-      followee.followers.push(followerId);
-    }
-
-    // Save both users
-    await Promise.all([follower.save(), followee.save()]);
+    const isFollowing = updatedFollower.following.includes(followeeId);
 
     res.status(200).json({
-      message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully',
+      message: isFollowing ? 'Followed successfully' : 'Unfollowed successfully',
       follower: {
-        _id: follower._id,
-        following: follower.following
+        _id: updatedFollower._id,
+        following: updatedFollower.following
       },
       followee: {
-        _id: followee._id,
-        followers: followee.followers
+        _id: updatedFollowee._id,
+        followers: updatedFollowee.followers
       }
     });
   } catch (error) {

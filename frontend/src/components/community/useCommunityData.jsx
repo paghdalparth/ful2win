@@ -299,7 +299,6 @@ export default function useCommunityData() {
 
   // Toggle follow/unfollow
   const toggleFollow = async (followeeId) => {
-    // Get current user from localStorage
     const currentUser = JSON.parse(localStorage.getItem('user'));
     if (!currentUser) {
       console.error('No current user found');
@@ -307,58 +306,61 @@ export default function useCommunityData() {
     }
     const followerId = currentUser._id;
 
+    // Store previous state for rollback
+    const previousUsers = [...users];
+    const previousFollows = { ...follows };
+
+    // First check current follow status from the users array
+    const currentFollower = users.find(user => user._id === followerId);
+    const isCurrentlyFollowing = currentFollower?.following?.includes(followeeId);
+
+    // Optimistically update UI
+    setUsers(prevUsers => 
+      prevUsers.map(user => {
+        if (user._id === followeeId) {
+          const newFollowers = isCurrentlyFollowing
+            ? (user.followers || []).filter(id => id !== followerId)
+            : [...(user.followers || []), followerId];
+          return { ...user, followers: newFollowers };
+        }
+        if (user._id === followerId) {
+          const newFollowing = isCurrentlyFollowing
+            ? (user.following || []).filter(id => id !== followeeId)
+            : [...(user.following || []), followeeId];
+          return { ...user, following: newFollowing };
+        }
+        return user;
+      })
+    );
+
+    // Update follows state
+    setFollows(prevFollows => {
+      const followerList = prevFollows[followerId] || [];
+      const newFollowerList = isCurrentlyFollowing
+        ? followerList.filter(id => id !== followeeId)
+        : [...followerList, followeeId];
+      return { ...prevFollows, [followerId]: newFollowerList };
+    });
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/users/follow/${followeeId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ followerId }),
       });
 
       if (!response.ok) {
+        // Revert optimistic update on error
+        setUsers(previousUsers);
+        setFollows(previousFollows);
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to toggle follow status');
       }
 
       const data = await response.json();
-      console.log('Follow status updated:', data);
-
-      // Update local state with the new follow status
-      setFollows((prevFollows) => {
-        const followerList = prevFollows[followerId] || [];
-        const isCurrentlyFollowing = followerList.includes(followeeId);
-        const updatedList = isCurrentlyFollowing
-          ? followerList.filter((id) => id !== followeeId)
-          : [...followerList, followeeId];
-
-        return {
-          ...prevFollows,
-          [followerId]: updatedList,
-        };
-      });
-
-      // Update users state with new follower counts
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => {
-          if (user._id === followeeId) {
-            return {
-              ...user,
-              followers: data.followee.followers.length,
-            };
-          }
-          if (user._id === followerId) {
-            return {
-              ...user,
-              following: data.follower.following.length,
-            };
-          }
-          return user;
-        })
-      );
-
-      // Add notification for follow
-      if (!data.follower.following.includes(followeeId)) {
+      
+      // Add notification only on successful follow
+      if (data.message === 'Followed successfully') {
         const followee = users.find(u => u._id === followeeId);
         if (followee) {
           addNotification({
@@ -371,9 +373,22 @@ export default function useCommunityData() {
         }
       }
 
+      // Update the UI with the server response to ensure consistency
+      setUsers(prevUsers => 
+        prevUsers.map(user => {
+          if (user._id === followeeId) {
+            return { ...user, followers: data.followee.followers };
+          }
+          if (user._id === followerId) {
+            return { ...user, following: data.follower.following };
+          }
+          return user;
+        })
+      );
+
     } catch (error) {
       console.error('Error toggling follow status:', error);
-      // You might want to set an error state here to display a message in the UI
+      // Optimistic update will be reverted on error
     }
   };
 

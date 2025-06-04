@@ -89,42 +89,35 @@ export default function SpinToWin() {
   };
 
   const handleSpin = () => {
-    // Check if daily spin limit reached
     if (remainingSpins <= 0) {
       alert("You've used all your daily spins! Come back tomorrow.");
       return;
     }
-    
-    // Deduct from daily spins
     const newRemainingSpins = remainingSpins - 1;
     setRemainingSpins(newRemainingSpins);
-    
-    // Save updated data
     saveGameData(coinBalance, newRemainingSpins);
-    
     setIsSpinning(true);
     setResult(null);
     setShowCoinAnimation(false);
-    
-    // Get random prize with weighted probabilities
-    const idx = Math.floor(Math.random() * prizes.length);
-    const prize = prizes[idx];
-    
+
     const segmentAngle = 360 / prizes.length;
-    // More spins for more dramatic effect (5-7 full rotations)
+    // Spin a random number of full rotations plus a random offset
     const spinRotations = 5 + Math.random() * 2;
-    const newAngle = 360 * spinRotations + (360 - ((idx + 1) * segmentAngle));
-    
+    const randomOffset = Math.random() * 360;
+    const newAngle = 360 * spinRotations + randomOffset;
     setAngle((prev) => prev + newAngle);
-    
-    // Longer spinning time for better effect
+
     setTimeout(() => {
+      // Calculate which segment is at the bottom (270deg)
+      const finalAngle = (angle + newAngle) % 360;
+      // The angle at the pointer is 270deg, so calculate the offset from 0deg
+      const pointerAngle = (270 - finalAngle + 360) % 360;
+      const idx = Math.floor(pointerAngle / segmentAngle) % prizes.length;
+      const prize = prizes[idx];
       setResult(prize);
       setIsSpinning(false);
-      // Add won coins to balance
       const updatedBalance = coinBalance + Number(prize.label);
       setCoinBalance(updatedBalance);
-      // Update local storage with new balance
       saveGameData(updatedBalance, newRemainingSpins);
       setShowCoinAnimation(true);
     }, 4000);
@@ -230,19 +223,6 @@ export default function SpinToWin() {
               boxShadow: '0 0 50px 10px rgba(255, 215, 0, 0.3)',
               filter: 'blur(8px)'
             }} />
-
-            {/* Pointer Triangle at the bottom */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-6 z-20">
-              <svg width="24" height="24" viewBox="0 0 24 24">
-                <polygon 
-                  points="12,24 0,0 24,0" 
-                  fill="#FFD700"
-                  style={{
-                    filter: 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.5))'
-                  }}
-                />
-              </svg>
-            </div>
 
             {/* Gold wheel border */}
             <div 
