@@ -127,11 +127,39 @@ router.put('/round/:gameId', async (req, res) => {
           game.winner = game.players[1].userId;
         }
       }
+
+      await game.save();
+      // Emit the updated game state to the room
+      const roomId = game.roomId;
+      if (req.io && roomId) {
+        req.io.to(roomId).emit('game_state_updated', game);
+        console.log(`Emitted game_state_updated to room ${roomId} after round completion.`);
+      } else {
+        console.error('Socket.IO or Room ID not available for emitting game state update.');
+      }
+
     }
 
-    await game.save();
-    req.io?.emit('roundUpdated', game);
-    res.status(200).json(game);
+    // Only send a success response here, the game state update is emitted via socket
+    if (!(round.player1Card && round.player2Card)) {
+      // If the round is not yet completed, save the partial state and emit a minimal update if necessary
+      // (Optional: You might decide not to emit anything until the round is complete)
+      await game.save();
+      const roomId = game.roomId;
+      if (req.io && roomId) {
+        req.io.to(roomId).emit('game_state_updated', {
+          _id: game._id,
+          currentRound: game.currentRound,
+          rounds: game.rounds,
+          players: game.players
+        });
+        console.log(`Emitted partial game_state_updated to room ${roomId} after single card draw.`);
+      } else {
+        console.error('Socket.IO or Room ID not available for emitting partial game state update.');
+      }
+    }
+
+    res.status(200).json({ message: 'Card drawn successfully.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

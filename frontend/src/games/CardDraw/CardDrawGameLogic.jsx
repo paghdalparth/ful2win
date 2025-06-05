@@ -40,7 +40,9 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
       try {
         const response = await axios.get(`http://localhost:5000/api/carddraw/room/${roomId}`);
         const gameData = response.data;
+        console.log('initializeGame fetched game data:', gameData); // Log initial fetch data
         setGame(gameData);
+        handleRoundUpdate(gameData); // Process initial game state to set turn
         setGameId(gameData._id);
         setIsPlayer1(gameData.players[0].userId === userId);
       } catch (error) {
@@ -58,13 +60,34 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
     try {
       setIsProcessingUpdate(true);
       setGame(updatedGame);
+      console.log('handleRoundUpdate received game:', updatedGame); // Log the received game state
 
       // Check if it's player's turn
       const currentRound = updatedGame.rounds.find(r => r.roundNumber === updatedGame.currentRound);
+      console.log('handleRoundUpdate - currentRound:', currentRound); // Log the current round
+      console.log('handleRoundUpdate - isPlayer1:', isPlayer1, 'userId:', userId); // Log player identity
+
       if (currentRound) {
+        // Determine if it's player 1 or player 2's turn based on whether they've played a card
         const isPlayer1Turn = !currentRound.player1Card;
         const isPlayer2Turn = !currentRound.player2Card;
-        setIsPlayerTurn((isPlayer1 && isPlayer1Turn) || (!isPlayer1 && isPlayer2Turn));
+        console.log('handleRoundUpdate - isPlayer1Turn:', isPlayer1Turn, 'isPlayer2Turn:', isPlayer2Turn); // Log turn status
+
+        // A player's turn is true if they are Player 1 AND it's Player 1's turn based on the round state,
+        // OR if they are NOT Player 1 AND it's Player 2's turn based on the round state.
+        const currentPlayerIsPlayer1InGame = updatedGame.players[0].userId === userId;
+        const currentPlayerIsPlayer2InGame = updatedGame.players[1].userId === userId;
+
+        let isMyTurn = false;
+        if (currentPlayerIsPlayer1InGame && isPlayer1Turn) {
+            isMyTurn = true;
+        } else if (currentPlayerIsPlayer2InGame && isPlayer2Turn) {
+            isMyTurn = true;
+        }
+
+        setIsPlayerTurn(isMyTurn);
+        console.log('handleRoundUpdate - setIsPlayerTurn:', isMyTurn); // Log final isPlayerTurn value
+
       }
 
       // Check if game is over
@@ -83,9 +106,8 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
     // Listen for the game_state_updated event
     socket.on('game_state_updated', (updatedGame) => {
       console.log('Received game_state_updated:', updatedGame);
-      setGame(updatedGame);
-      // You might want to add more logic here based on the updated game state,
-      // e.g., check if it's the player's turn, update displayed cards, etc.
+      // Call handleRoundUpdate to process the updated game state
+      handleRoundUpdate(updatedGame);
     });
 
     // Existing listeners
