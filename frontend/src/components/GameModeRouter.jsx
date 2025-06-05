@@ -1,6 +1,9 @@
 import React, { lazy, Suspense, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import GameModeConnector from './GameModeConnector';
+import GameModeLayout from './game-modes-carddraw/GameModeLayout';
+import ClassicMode from './game-modes-carddraw/ClassicMode';
+import TournamentMode from './game-modes-carddraw/TournamentMode';
 
 /**
  * GameModeRouter - Handles routing for game modes across all games
@@ -8,6 +11,7 @@ import GameModeConnector from './GameModeConnector';
  */
 const GameModeRouter = ({ onBack, gameType = "tictactoe" }) => {
   const [loadErrors, setLoadErrors] = useState({});
+  const navigate = useNavigate();
 
   // Generic error fallback component
   const ErrorFallback = ({ componentName, gameTypeName }) => (
@@ -35,6 +39,18 @@ const GameModeRouter = ({ onBack, gameType = "tictactoe" }) => {
 
   // Dynamic imports based on game type
   const getComponent = (mode) => {
+    // Special handling for Card Draw War game
+    if (gameType === 'carddraw') {
+      switch (mode) {
+        case 'ClassicMode':
+          return <ClassicMode onBack={onBack} gameId={gameType} />;
+        case 'TournamentMode':
+          return <TournamentMode onBack={onBack} gameId={gameType} />;
+        default:
+          return <ErrorFallback componentName={mode} gameTypeName={gameType} />;
+      }
+    }
+
     // Create a unique key for this game type and mode
     const componentKey = `${gameType}-${mode}`;
     
@@ -68,6 +84,10 @@ const GameModeRouter = ({ onBack, gameType = "tictactoe" }) => {
       setLoadErrors(prev => ({ ...prev, [componentKey]: true }));
       return <ErrorFallback componentName={mode} gameTypeName={gameType} />;
     }
+  };
+
+  const handleModeSelect = (mode) => {
+    navigate(`/games/${gameType}/play/${mode}`);
   };
 
   return (

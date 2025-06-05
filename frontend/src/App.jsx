@@ -30,6 +30,8 @@ import GameConnector from './components/GameConnector';
 import EnhancedGameLobby from './components/EnhancedGameLobby';
 import MemoryMatchTestEntry from './components/debug/MemoryMatchTestEntry';
 import WalletTest from './components/debug/WalletTest';
+import CardDrawGameLogic from './games/CardDraw/CardDrawGameLogic';
+import PracticeMode from './components/game-modes-carddraw/PracticeMode';
 
 // Games
 import SPS from './games/Stone-Paper/SPS';
@@ -402,6 +404,23 @@ function App() {
         {/* Debug Routes */}
         <Route path="/debug/memory-game" element={<PrivateRoute><MemoryMatchTestEntry /></PrivateRoute>} />
         <Route path="/debug/wallet-test" element={<PrivateRoute><WalletTest /></PrivateRoute>} />
+        
+        {/* Card Draw War Game Routes */}
+        <Route path="/games/carddraw" element={<PrivateRoute>
+          <GameDashboard 
+            gameTitle="Card Draw War" 
+            gameImage="/carddraw.jpg"
+            gameCategory="Card"
+            gameId="carddraw"
+          /></PrivateRoute>
+        } />
+        <Route path="/games/:gameId/play/classic" element={<PrivateRoute><GameConnector /></PrivateRoute>} />
+        <Route path="/games/:gameId/play/tournament" element={<PrivateRoute><GameConnector /></PrivateRoute>} />
+        <Route 
+          path="/games/carddraw/*" 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="carddraw" gameId="carddraw" /></PrivateRoute>} 
+        />
+        <Route path="/games/carddraw/practice" element={<PracticeMode />} />
         
         <Route path="*" element={<PrivateRoute><NotFound /></PrivateRoute>} />
         <Route path="/login" element={<GamingLoginMobile />} />

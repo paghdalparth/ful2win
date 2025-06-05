@@ -11,11 +11,12 @@ import CoinflipGameLogic from "../games/Coinflip/CoinflipGameLogic";
 import DiceGameLogic from "../games/Dice/DiceGameLogic";
 import StoneGameLogic from "../games/Stone-Paper/StoneGameLogic";
 import DuckHuntGame from "../games/DuckHunt/logic";
+import CardDrawGameLogic from "../games/CardDraw/CardDrawGameLogic";
 import socket from '../socekt';
 const EnhancedGameLobby = ({
   entryFee = 10,
   gameMode = "Classic",
-  gameImg="/"+gameImg+".jpg",
+  gameImg = "memorymatch",
   onPlayAgain = null,
   onExit = null,
   gameId: propGameId = null,
@@ -291,10 +292,24 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
 
   // Get game title with proper capitalization
   const getGameTitle = () => {
-    if (!gameId) return "Game";
-    if (gameId.toLowerCase() === "bgmi") return "BGMI";
-    if (gameId.toLowerCase() === "tictactoe") return "Tic-Tac-Toe";
-    return gameId.charAt(0).toUpperCase() + gameId.slice(1);
+    switch (gameId) {
+      case 'carddraw':
+        return 'Card Draw War';
+      case 'tictactoe':
+        return 'Tic Tac Toe';
+      case 'stonepaper':
+        return 'Stone Paper Scissors';
+      case 'coinflip':
+        return 'Coin Flip';
+      case 'dice':
+        return 'Dice Duel';
+      case 'memorymatch':
+        return 'Memory Match';
+      case 'duckhunt':
+        return 'Duck Hunt';
+      default:
+        return gameId.charAt(0).toUpperCase() + gameId.slice(1);
+    }
   };
 
   // Add a function to handle tournament progress
@@ -359,74 +374,33 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
   
   // Render the appropriate game component based on gameId
   const renderGameComponent = () => {
-    console.log("Rendering game component for gameId:", gameId);
-    console.log("Current status:", status);
-    
-    // Try to dynamically import and render game component based on gameId
-    if(localStorage.getItem("match_found")){
-    try {
-      // Map of game IDs to their corresponding logic components
-      const gameComponents = {
-        "memorymatch": MemoryMatchGameLogic,
-        "tictactoe": TictactoeGameLogic,
-        "coinflip": CoinflipGameLogic,
-        "dice": DiceGameLogic,
-        "stonepaper": StoneGameLogic,
-        "duckhuntgame": DuckHuntGame
-      };
-      
-      // Get the component from the map or use a fallback
-      const GameComponent = gameComponents[gameId.toLowerCase()];
-      
-      if (GameComponent) {
-        console.log("Found game component:", GameComponent.name);
-        return (
-          <div className="w-full h-full">
-            <GameComponent 
-              onGameEnd={handleGameCompletion} 
-              roomId={roomId}
-              userId={userId}
-            />
-          </div>
-        );
-      } else {
-        console.warn(`No component found for game: ${gameId}. Using fallback.`);
-        return (
-          <div className="flex flex-col items-center justify-center h-full">
-            <Gamepad size={48} className="text-white mb-4" />
-            <h2 className="text-2xl font-light text-white mb-2">Game Loading...</h2>
-            <p className="text-white/70">This game will be available soon!</p>
-          </div>
-        );
-      }
-    } catch (error) {
-      console.error(`Error loading game component for ${gameId}:`, error);
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <Gamepad size={48} className="text-white mb-4" />
-          <h2 className="text-2xl font-light text-white mb-2">Something went wrong</h2>
-          <p className="text-white/70">Unable to load game. Please try again.</p>
-          <button 
-            onClick={handleExit} 
-            className="mt-4 px-4 py-2 bg-red-500 rounded-lg text-white"
-          >
-            Return to Menu
-          </button>
-        </div>
-      );
+    switch (gameId) {
+      case 'tictactoe':
+        return <TictactoeGameLogic onGameEnd={handleGameCompletion} />;
+      case 'stonepaper':
+        return <StoneGameLogic onGameEnd={handleGameCompletion} />;
+      case 'coinflip':
+        return <CoinflipGameLogic onGameEnd={handleGameCompletion} />;
+      case 'dice':
+        return <DiceGameLogic onGameEnd={handleGameCompletion} />;
+      case 'memorymatch':
+        return <MemoryMatchGameLogic onGameEnd={handleGameCompletion} />;
+      case 'carddraw':
+        return <CardDrawGameLogic onGameEnd={handleGameCompletion} />;
+      default:
+        return <div>Game not found</div>;
     }
-    }else{
-      console.log("nothing")
-    }
-
   };
+
+  // Use a local variable for the image source
+  const imgSrc = "/" + (gameImg || "memorymatch") + ".jpg";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center">
       {/* Dynamic Game Background */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={"/"+gameImg+".jpg" || "/placeholder.jpg"} 
+          src={imgSrc} 
           alt="Game Background" 
           className="w-full h-full object-cover"
         />

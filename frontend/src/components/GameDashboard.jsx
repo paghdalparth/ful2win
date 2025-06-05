@@ -61,26 +61,35 @@ export default function GameDashboard({
         if (!gameTitle) return "/games";
         
         // Convert gameTitle to match route pattern
-        const gamePath = gameTitle.toLowerCase();
+        let gamePath = gameTitle.toLowerCase();
+        
+        // Special case for Card Draw War
+        if (gameTitle === "Card Draw War") {
+            gamePath = "carddraw";
+        } else {
+            // For other games, remove spaces
+            gamePath = gamePath.replace(/\s+/g, '');
+        }
+        
         return `/games/${gamePath}/play`;
     };
 
     const renderView = () => {
         switch (currentView) {
             case "classicMode":
-                navigate(`/games/${gameTitle.toLowerCase()}/select/classic`);
+                navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/classic`);
                 return null;
             case "tournament":
-                navigate(`/games/${gameTitle.toLowerCase()}/select/tournament`);
+                navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/tournament`);
                 return null;
             case "privateRoom":
-                navigate(`/games/${gameTitle.toLowerCase()}/select/private`);
+                navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/private`);
                 return null;
             case "playNow":
                 navigate(getGamePath())
                 return null
             case "practice":
-                navigate(getGamePath())
+                navigate('/games/carddraw/practice')
                 return null
             default:
                 return (
@@ -158,7 +167,7 @@ export default function GameDashboard({
                                 </button>
                                 <button
                                     className="flex-1 py-3 rounded-lg border border-blue-500 text-blue-400 font-medium bg-blue-500/10 shadow-lg hover:bg-blue-500/20 transition-all active:scale-95"
-                                    onClick={() => navigate(getGamePath())}
+                                    onClick={() => navigate('/games/carddraw/practice')}
                                 >
                                     Practice
                                 </button>
@@ -171,7 +180,7 @@ export default function GameDashboard({
                                     {/* Classic Mode - Show for all games */}
                                     <div
                                         className="bg-gray-800/50 rounded-xl shadow-lg p-3 border border-gray-700/50 transition-all hover:shadow-xl hover:bg-gray-800 cursor-pointer"
-                                        onClick={() => navigate(`/games/${gameTitle.toLowerCase()}/select/classic`)}
+                                        onClick={() => navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/classic`)}
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex flex-col gap-0.5">
@@ -182,7 +191,7 @@ export default function GameDashboard({
                                                 className="w-28 h-[48px] bg-[#009E60] px-2 py-0.5 rounded-lg font-bold text-white shadow-md hover:brightness-110 transition-all active:scale-95"
                                                 onClick={(e) => {
                                                     e.stopPropagation()
-                                                    navigate(`/games/${gameTitle.toLowerCase()}/select/classic`)
+                                                    navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/classic`)
                                                 }}
                                             >
                                                 <div className="flex flex-col items-center justify-center gap-0 h-full">
@@ -197,7 +206,7 @@ export default function GameDashboard({
                                     {isActionGame && (
                                         <div
                                             className="bg-gray-800/50 rounded-xl shadow-lg p-3 border border-gray-700/50 transition-all hover:shadow-xl hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => navigate(`/games/${gameTitle.toLowerCase()}/select/quick`)}
+                                            onClick={() => navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/quick`)}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex flex-col gap-0.5">
@@ -208,7 +217,7 @@ export default function GameDashboard({
                                                     className="w-28 h-[48px] bg-[#009E60] px-2 py-0.5 rounded-lg font-bold text-white shadow-md hover:brightness-110 transition-all active:scale-95"
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        navigate(`/games/${gameTitle.toLowerCase()}/select/quick`)
+                                                        navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/quick`)
                                                     }}
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-0 h-full">
@@ -223,7 +232,7 @@ export default function GameDashboard({
                                     {/* Tournament Mode - Show for all games */}
                                     <div
                                         className="bg-gray-800/50 rounded-xl shadow-lg p-3 border border-gray-700/50 transition-all hover:shadow-xl hover:bg-gray-800 cursor-pointer"
-                                        onClick={() => navigate(`/games/${gameTitle.toLowerCase()}/select/tournament`)}
+                                        onClick={() => navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/tournament`)}
                                     >
                                         <div className="flex items-start justify-between">
                                             <div className="flex flex-col gap-0.5">
@@ -234,7 +243,7 @@ export default function GameDashboard({
                                                 className="w-28 h-[48px] bg-[#009E60] px-2 py-0.5 rounded-lg font-bold text-white shadow-md hover:brightness-110 transition-all active:scale-95"
                                                 onClick={(e) => {
                                                     e.stopPropagation()
-                                                    navigate(`/games/${gameTitle.toLowerCase()}/select/tournament`)
+                                                    navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/tournament`)
                                                 }}
                                             >
                                                 <div className="flex flex-col items-center justify-center gap-0 h-full">
@@ -249,7 +258,7 @@ export default function GameDashboard({
                                     {isActionGame ? (
                                         <div
                                             className="bg-gray-800/50 rounded-xl shadow-lg p-3 border border-gray-700/50 transition-all hover:shadow-xl hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => navigate(`/games/${gameTitle.toLowerCase()}/select/private`)}
+                                            onClick={() => navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/private`)}
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex flex-col gap-0.5">
@@ -260,7 +269,7 @@ export default function GameDashboard({
                                                     className="w-28 h-[48px] bg-[#009E60] px-2 py-0.5 rounded-lg font-bold text-white shadow-md hover:brightness-110 transition-all active:scale-95"
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        navigate(`/games/${gameTitle.toLowerCase()}/select/private`)
+                                                        navigate(`/games/${gameTitle === "Card Draw War" ? "carddraw" : gameTitle.toLowerCase().replace(/\s+/g, '')}/select/private`)
                                                     }}
                                                 >
                                                     <div className="flex flex-col items-center justify-center gap-0 h-full">

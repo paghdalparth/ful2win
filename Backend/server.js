@@ -13,8 +13,10 @@ const chatRoutes = require('./routes/chat');
 
 const ticTacToeGameRoutes = require('./routes/ticTacToeGame');
 const rockPaperGameRoutes = require('./routes/rockPaperGameRoutes');
+const cardDrawGameRoutes = require('./routes/cardDrawGameRoutes');
 const userRoutes = require('./routes/userRoutes');
 const DuckHunt = require('./models/DuckHunt');
+const CardDrawGame = require('./models/CardDrawGame');
 const app = express();
 const server = http.createServer(app);
 
@@ -26,6 +28,7 @@ const io = new Server(server, {
   },
 });
 
+console.log('=== Backend started! (CardDrawGame debug) ===');
 
 // Middleware
 app.use((req, res, next) => {
@@ -42,14 +45,15 @@ app.use('/uploads', express.static('uploads'));
 require('./config/db')();
 
 // API Routes
-app.use('/api/games', gameRoutes);
-app.use('/api/post', postRoutes);
+app.use('/api/game', gameRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/protected', protected);
 app.use('/api/chat', chatRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
-app.use('/api/game', rockPaperGameRoutes);
-app.use('/api/protected', protected); // secured routes
+app.use('/api/rockpaper', rockPaperGameRoutes);
+app.use('/api/carddraw', cardDrawGameRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/duckhunt', DuckHunt); // secured routes
 
 // Socket.IO Connection
@@ -74,6 +78,33 @@ io.on('connection', (socket) => {
           ],
           status: 'in-progress'
         });
+
+        // --- Card Draw War: Create CardDrawGame document when match is found ---
+        console.log('Match found for gameId:', gameId, typeof gameId);
+        if (gameId === 'carddraw') {
+          try {
+            console.log('Trying to create CardDrawGame for room:', newRoom._id.toString());
+            const doc = await CardDrawGame.create({
+              roomId: newRoom._id.toString(),
+              players: [
+                { userId: newRoom.players[0].userId, score: 0 },
+                { userId: newRoom.players[1].userId, score: 0 }
+              ],
+              status: 'waiting',
+              rounds: [
+                { roundNumber: 1, status: 'pending' },
+                { roundNumber: 2, status: 'pending' },
+                { roundNumber: 3, status: 'pending' }
+              ],
+              currentRound: 1
+            });
+            console.log('CardDrawGame created:', doc);
+          } catch (err) {
+            console.error('Error creating CardDrawGame:', err);
+          }
+        } else {
+          console.log('gameId did not match "carddraw", got:', gameId);
+        }
 
         // Notify both players
         socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
