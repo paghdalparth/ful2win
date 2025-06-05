@@ -78,8 +78,17 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
 
   // Socket event listeners
   useEffect(() => {
-    if (!roomId || !gameId) return;
+    if (!roomId || !userId) return; // Ensure roomId and userId are available
 
+    // Listen for the game_state_updated event
+    socket.on('game_state_updated', (updatedGame) => {
+      console.log('Received game_state_updated:', updatedGame);
+      setGame(updatedGame);
+      // You might want to add more logic here based on the updated game state,
+      // e.g., check if it's the player's turn, update displayed cards, etc.
+    });
+
+    // Existing listeners
     socket.on('gameCreated', (game) => {
       if (!gameId) {
         setGameId(game._id);
@@ -90,10 +99,12 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
     socket.on('roundUpdated', handleRoundUpdate);
 
     return () => {
+      // Clean up listeners
+      socket.off('game_state_updated');
       socket.off('gameCreated');
       socket.off('roundUpdated');
     };
-  }, [roomId, gameId, userId, handleRoundUpdate]);
+  }, [roomId, userId, gameId, handleRoundUpdate]); // Include gameId in dependencies
 
   // Draw card
   const drawCard = async (card) => {

@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
         if (gameId === 'carddraw') {
           try {
             console.log('Trying to create CardDrawGame for room:', newRoom._id.toString());
-            const doc = await CardDrawGame.create({
+            let doc = await CardDrawGame.create({
               roomId: newRoom._id.toString(),
               players: [
                 { userId: newRoom.players[0].userId, score: 0 },
@@ -99,16 +99,38 @@ io.on('connection', (socket) => {
               currentRound: 1
             });
             console.log('CardDrawGame created:', doc);
+
+            // Have both players join the room
+            socket.join(newRoom._id.toString());
+            io.sockets.sockets.get(opponent.socketId)?.join(newRoom._id.toString());
+            console.log(`Socket ${socket.id} and ${opponent.socketId} joined room ${newRoom._id.toString()}`);
+
+            // Update game status to ongoing and save
+            doc.status = 'ongoing';
+            await doc.save();
+            console.log('CardDrawGame status updated to ongoing:', doc);
+
+            // Emit the updated game state to the room
+            io.to(newRoom._id.toString()).emit('game_state_updated', doc);
+            console.log('Emitted game_state_updated to room:', newRoom._id.toString(), doc);
+
+            // Notify both players of the match
+            socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
+            io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
+
           } catch (err) {
-            console.error('Error creating CardDrawGame:', err);
+            console.error('Error creating or starting CardDrawGame:', err);
+            // Consider emitting an error event to the players here
+             socket.emit('matchmaking_error', 'Error starting game');
+             io.to(opponent.socketId).emit('matchmaking_error', 'Error starting game');
           }
         } else {
           console.log('gameId did not match "carddraw", got:', gameId);
+           // Existing logic for other game types if any
+           // Notify both players of the match for other games
+           socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
+           io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
         }
-
-        // Notify both players
-        socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-        io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
 
       } else {
         // No opponent found yet, add to queue
