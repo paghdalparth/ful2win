@@ -276,60 +276,73 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
   if (!game) return <div>Loading...</div>;
 
   return (
-    <div className="flex flex-col items-center gap-8 p-8">
-      {/* Game status */}
-      <div className="text-xl font-bold">
-        {game.status === 'finished' ? 'Game Over' : `Round ${game.currentRound}`}
-      </div>
-
-      {/* Score display */}
-      <div className="flex gap-8">
-        <div className="text-center">
-          <p className="font-semibold">Player 1</p>
-          <p className="text-2xl">{game.players[0].score}</p>
+    <div className="flex flex-col items-center justify-center p-4">
+      {/* Display game information */}
+      <h2 className="text-2xl font-bold mb-4">Card Draw War</h2>
+      {game && (
+        <div className="flex justify-around w-full text-xl mb-4">
+          <span>Player 1 Score: {game.players[0]?.score || 0}</span>
+          <span>Player 2 Score: {game.players[1]?.score || 0}</span>
         </div>
-        <div className="text-center">
-          <p className="font-semibold">Player 2</p>
-          <p className="text-2xl">{game.players[1].score}</p>
-        </div>
-      </div>
+      )}
 
-      {/* Current round */}
-      {game.status !== 'finished' && (
-        <div className="text-center">
-          <p className="mb-4">
-            {isPlayerTurn ? "Your turn - Draw a card!" : "Waiting for opponent..."}
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {availableCards.map(card => (
+      {/* Display current round information */}
+      {game?.currentRound && game.status !== 'finished' && (
+        <h3 className="text-xl mb-4">Round {game.currentRound}</h3>
+      )}
+
+      {/* Display waiting message or game board */}
+      {!game || game.status === 'waiting' ? (
+        <p className="text-xl">Waiting for opponent...</p>
+      ) : game.status === 'ongoing' ? (
+        <div className="flex flex-col items-center gap-4">
+          {/* Display message for current turn or round result */}
+          {!selectedCard && isPlayerTurn && (
+            <p className="text-lg font-semibold">Your turn to draw a card!</p>
+          )}
+          {selectedCard && (
+            <p className="text-lg font-semibold">You drew: {selectedCard}</p>
+          )}
+
+          {/* Display available cards */}
+          <div className="grid grid-cols-7 gap-2">
+            {availableCards.map((card) => (
               <Card
                 key={card}
                 value={card}
                 onClick={() => drawCard(card)}
-                disabled={!isPlayerTurn || isProcessingUpdate}
+                disabled={!isPlayerTurn || isProcessingUpdate || selectedCard !== null}
               />
             ))}
           </div>
+
+          {/* Display round results if available for the previous round */}
+          {game.rounds.length >= game.currentRound && game.rounds[game.currentRound - 1]?.status === 'completed' && (
+             <RoundResult round={game.rounds[game.currentRound - 1]} />
+          )}
+
+
         </div>
-      )}
-
-      {/* Round results */}
-      {game.rounds.map(round => (
-        round.status === 'completed' && (
-          <RoundResult key={round.roundNumber} round={round} />
-        )
-      ))}
-
-      {/* Game over message */}
-      {game.status === 'finished' && (
+      ) : game.status === 'finished' ? (
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            {game.winner ? (
-              game.winner === userId ? "You won!" : "You lost!"
-            ) : "It's a tie!"}
-          </h2>
+          <h3 className="text-2xl font-bold mb-4">Game Over!</h3>
+          {game.winner ? (
+            <p className="text-xl">Winner: {game.winner === userId ? "You" : "Opponent"}</p>
+          ) : (
+            <p className="text-xl">It's a tie!</p>
+          )}
+          {/* Optionally display final scores */}
+           <div className="flex justify-around w-full text-xl mb-4 mt-2">
+              <span>Player 1 Final Score: {game.players[0]?.score || 0}</span>
+              <span>Player 2 Final Score: {game.players[1]?.score || 0}</span>
+            </div>
+          {onGameEnd && <button onClick={() => onGameEnd(game)} className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">View Results</button>}
         </div>
+      ) : (
+        // Handle other potential game statuses or initial loading
+        <p className="text-xl">Loading game...</p>
       )}
+
     </div>
   );
 };
