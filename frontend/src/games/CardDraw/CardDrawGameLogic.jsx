@@ -38,7 +38,7 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
     if (practiceMode) return; // skip API logic in practice mode
     const initializeGame = async () => {
       try {
-        const response = await axios.get(`https://ful2win-backend.onrender.com/api/carddraw/room/${roomId}`);
+        const response = await axios.get(`http://localhost:5000/api/carddraw/room/${roomId}`);
         const gameData = response.data;
         setGame(gameData);
         setGameId(gameData._id);
@@ -118,7 +118,7 @@ const CardDrawGameLogic = ({ onGameEnd, practiceMode = false }) => {
       setAvailableCards(prev => prev.filter(c => c !== card));
 
       // Update game state
-      await axios.put(`https://ful2win-backend.onrender.com/api/carddraw/round/${gameId}`, {
+      await axios.put(`http://localhost:5000/api/carddraw/round/${gameId}`, {
         roundNumber: game.currentRound,
         playerCard: card,
         playerId: userId
