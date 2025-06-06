@@ -15,13 +15,13 @@ router.post('/create', async (req, res) => {
     };
 
     const game = await TicTacToeGame.create(gameData);
+    console.log(gameData)
     req.io?.emit('gameCreated', game);
     res.status(201).json(game);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
-
 // Get game by roomId
 // router.get('/room/:roomId', async (req, res) => {
 //   try {
