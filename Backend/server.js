@@ -13,22 +13,19 @@ const chatRoutes = require('./routes/chat');
 
 const ticTacToeGameRoutes = require('./routes/ticTacToeGame');
 const rockPaperGameRoutes = require('./routes/rockPaperGameRoutes');
-const cardDrawGameRoutes = require('./routes/cardDrawGameRoutes');
 const userRoutes = require('./routes/userRoutes');
 const DuckHunt = require('./models/DuckHunt');
-const CardDrawGame = require('./models/CardDrawGame');
 const app = express();
 const server = http.createServer(app);
 
 // Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000","http://localhost:5173" , "https://ful2win.onrender.com"],  // Your deployed frontend URL
+    origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2win.onrender.com"],  // Your deployed frontend URL
     methods: ["GET", "POST", "PUT"],
   },
 });
 
-console.log('=== Backend started! (CardDrawGame debug) ===');
 
 // Middleware
 app.use((req, res, next) => {
@@ -36,24 +33,22 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173" , "https://ful2win.onrender.com"]
+  origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2win.onrender.com"]
 }));
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
 
 // Connect MongoDB
 require('./config/db')();
 
 // API Routes
-app.use('/api/game', gameRoutes);
-app.use('/api/posts', postRoutes);
+app.use('/api/games', gameRoutes);
+app.use('/api/post', postRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/protected', protected);
 app.use('/api/chat', chatRoutes);
-app.use('/api/tictactoe', ticTacToeGameRoutes);
-app.use('/api/rockpaper', rockPaperGameRoutes);
-app.use('/api/carddraw', cardDrawGameRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/tictactoe', ticTacToeGameRoutes);
+app.use('/api/game', rockPaperGameRoutes);
+app.use('/api/protected', protected); // secured routes
 app.use('/api/duckhunt', DuckHunt); // secured routes
 
 // Socket.IO Connection
@@ -79,58 +74,9 @@ io.on('connection', (socket) => {
           status: 'in-progress'
         });
 
-        // --- Card Draw War: Create CardDrawGame document when match is found ---
-        console.log('Match found for gameId:', gameId, typeof gameId);
-        if (gameId === 'carddraw') {
-          try {
-            console.log('Trying to create CardDrawGame for room:', newRoom._id.toString());
-            let doc = await CardDrawGame.create({
-              roomId: newRoom._id.toString(),
-              players: [
-                { userId: newRoom.players[0].userId, score: 0 },
-                { userId: newRoom.players[1].userId, score: 0 }
-              ],
-              status: 'waiting',
-              rounds: [
-                { roundNumber: 1, status: 'pending' },
-                { roundNumber: 2, status: 'pending' },
-                { roundNumber: 3, status: 'pending' }
-              ],
-              currentRound: 1
-            });
-            console.log('CardDrawGame created:', doc);
-
-            // Have both players join the room
-            socket.join(newRoom._id.toString());
-            io.sockets.sockets.get(opponent.socketId)?.join(newRoom._id.toString());
-            console.log(`Socket ${socket.id} and ${opponent.socketId} joined room ${newRoom._id.toString()}`);
-
-            // Update game status to ongoing and save
-            doc.status = 'ongoing';
-            await doc.save();
-            console.log('CardDrawGame status updated to ongoing:', doc);
-
-            // Emit the updated game state to the room
-            io.to(newRoom._id.toString()).emit('game_state_updated', doc);
-            console.log('Emitted game_state_updated to room:', newRoom._id.toString(), doc);
-
-            // Notify both players of the match
-            socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-            io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-
-          } catch (err) {
-            console.error('Error creating or starting CardDrawGame:', err);
-            // Consider emitting an error event to the players here
-             socket.emit('matchmaking_error', 'Error starting game');
-             io.to(opponent.socketId).emit('matchmaking_error', 'Error starting game');
-          }
-        } else {
-          console.log('gameId did not match "carddraw", got:', gameId);
-           // Existing logic for other game types if any
-           // Notify both players of the match for other games
-           socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-           io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-        }
+        // Notify both players
+        socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
+        io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
 
       } else {
         // No opponent found yet, add to queue
