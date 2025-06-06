@@ -27,12 +27,6 @@ const validatePhone = (phone) => {
   return re.test(String(phone))
 }
 
-const validateUsername = (username) => {
-  // Username validation: 3-30 chars, alphanumeric and underscore only
-  const re = /^[a-zA-Z0-9_]{3,30}$/;
-  return re.test(String(username));
-}
-
 const validatePassword = (password) => {
   // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
   const hasLength = password.length >= 8
@@ -64,7 +58,7 @@ const GlowCheckbox = ({ id, label, required, ...props }) => {
         <input
           id={id}
           type="checkbox"
-          className="appearance-none h-5 w-5 border border-white/20 rounded bg-black/30 transition-colors cursor-pointer peer"
+          className="appearance-none h-5 w-5 border border-white/20 rounded bg-black/30 checked:bg-purple-600 checked:border-0 transition-colors cursor-pointer"
           required={required}
           {...props}
         />
@@ -128,7 +122,7 @@ const GlowInput = ({ icon, error, touched, valid, label, ...props }) => (
 )
 
 // Password Input with toggle and strength indicator
-const PasswordInput = ({ value, onChange, error, touched, valid, label, showRequirements = false, ...props }) => {
+const PasswordInput = ({ value, onChange, error, touched, valid, label, ...props }) => {
   const [showPassword, setShowPassword] = useState(false)
   const passwordValidation = validatePassword(value || "")
 
@@ -165,7 +159,7 @@ const PasswordInput = ({ value, onChange, error, touched, valid, label, showRequ
 
       {touched && error && <p className="text-xs text-red-500 pl-1">{error}</p>}
 
-      {showRequirements && value && value.length > 0 && (
+      {value && value.length > 0 && (
         <div className="space-y-1 mt-2">
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((level) => (
@@ -245,20 +239,17 @@ const navigate = useNavigate();
 
   const [signupForm, setSignupForm] = useState({
     name: "",
-    username: "",
     phone: "",
     password: "",
     confirmPassword: "",
     touched: {
       name: false,
-      username: false,
       phone: false,
       password: false,
       confirmPassword: false,
     },
     errors: {
       name: "",
-      username: "",
       phone: "",
       password: "",
       confirmPassword: "",
@@ -374,34 +365,6 @@ const navigate = useNavigate();
       }
     }
 
-    if (signupForm.touched.username) {
-      if (!signupForm.username) {
-        setSignupForm((prev) => ({
-          ...prev,
-          errors: {
-            ...prev.errors,
-            username: "Username is required",
-          },
-        }));
-      } else if (!validateUsername(signupForm.username)) {
-        setSignupForm((prev) => ({
-          ...prev,
-          errors: {
-            ...prev.errors,
-            username: "Username must be 3-30 characters and can only contain letters, numbers, and underscores",
-          },
-        }));
-      } else {
-        setSignupForm((prev) => ({
-          ...prev,
-          errors: {
-            ...prev.errors,
-            username: "",
-          },
-        }));
-      }
-    }
-
     if (signupForm.touched.phone) {
       if (!signupForm.phone) {
         setSignupForm((prev) => ({
@@ -485,12 +448,12 @@ const navigate = useNavigate();
         }))
       }
     }
-  }, [signupForm.name, signupForm.username, signupForm.phone, signupForm.password, signupForm.confirmPassword, signupForm.touched])
+  }, [signupForm.name, signupForm.phone, signupForm.password, signupForm.confirmPassword, signupForm.touched])
 
   // Check if login form is valid
   const isLoginFormValid = () => {
     return (
-      loginForm.phone && loginForm.password && !loginForm.errors.phone && !loginForm.errors.password
+      loginForm.phone && loginForm.password && !loginForm.errors.phone && !loginForm.errors.password && termsAccepted
     )
   }
 
@@ -498,12 +461,10 @@ const navigate = useNavigate();
   const isSignupFormValid = () => {
     return (
       signupForm.name &&
-      signupForm.username &&
       signupForm.phone &&
       signupForm.password &&
       signupForm.confirmPassword &&
       !signupForm.errors.name &&
-      !signupForm.errors.username &&
       !signupForm.errors.phone &&
       !signupForm.errors.password &&
       !signupForm.errors.confirmPassword &&
@@ -689,7 +650,6 @@ const handleLogin = async (e) => {
     // Save token & user in localStorage
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.removeItem('splashShown'); // Clear splash flag so it shows after login
 
     // Redirect to home page
     navigate('/');
@@ -711,7 +671,6 @@ const handleLogin = async (e) => {
     ...prev,
     touched: {
       name: true,
-      username: true,
       phone: true,
       password: true,
       confirmPassword: true,
@@ -742,7 +701,6 @@ const handleLogin = async (e) => {
       },
       body: JSON.stringify({
         fullName: signupForm.name,
-        username: signupForm.username,
         phoneNumber: signupForm.phone,
         password: signupForm.password,
       }),
@@ -894,7 +852,6 @@ const handleLogin = async (e) => {
                       valid={loginForm.touched.password && !loginForm.errors.password && loginForm.password}
                       label="Password"
                       required
-                      showRequirements={false}
                     />
                   </div>
 
@@ -903,6 +860,26 @@ const handleLogin = async (e) => {
                       Forgot Password?
                     </a>
                   </div>
+
+                  {/* Terms checkbox */}
+                  <GlowCheckbox
+                    id="terms-login"
+                    required
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    label={
+                      <>
+                        I agree to the{" "}
+                        <a href="#" className="text-blue-400 hover:underline">
+                          Terms
+                        </a>{" "}
+                        and{" "}
+                        <a href="#" className="text-blue-400 hover:underline">
+                          Privacy Policy
+                        </a>
+                      </>
+                    }
+                  />
 
                   <GlowButton
                     gradient="bg-gradient-to-r from-blue-600 to-purple-600"
@@ -964,20 +941,6 @@ const handleLogin = async (e) => {
                     />
 
                     <GlowInput
-                      type="text"
-                      name="username"
-                      placeholder="Choose Username"
-                      icon={<FaUser size={14} />}
-                      value={signupForm.username}
-                      onChange={handleSignupChange}
-                      error={signupForm.errors.username}
-                      touched={signupForm.touched.username}
-                      valid={signupForm.touched.username && !signupForm.errors.username && signupForm.username}
-                      label="Username"
-                      required
-                    />
-
-                    <GlowInput
                       type="tel"
                       name="phone"
                       placeholder="Phone Number"
@@ -1001,7 +964,6 @@ const handleLogin = async (e) => {
                       valid={signupForm.touched.password && !signupForm.errors.password && signupForm.password}
                       label="Create Password"
                       required
-                      showRequirements={true}
                     />
 
                     <PasswordInput
@@ -1018,7 +980,6 @@ const handleLogin = async (e) => {
                       }
                       label="Confirm Password"
                       required
-                      showRequirements={false}
                     />
                   </div>
 
@@ -1110,7 +1071,7 @@ const handleLogin = async (e) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          © 2025 Ful2Win. All rights reserved.
+          © 2023 Ful2win. All rights reserved.
         </motion.div>
       </motion.div>
     </div>
